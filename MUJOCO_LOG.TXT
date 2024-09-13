@@ -172,3 +172,15 @@ ERROR: could not initialize GLFW
 Thu Sep 12 22:26:38 2024
 WARNING: Nan, Inf or huge value in QACC at DOF 63. The simulation is unstable. Time = 0.3422.
 
+Fri Sep 13 00:23:43 2024
+WARNING: Nan, Inf or huge value in QACC at DOF 0. The simulation is unstable. Time = 1.8978.
+
+Fri Sep 13 00:23:45 2024
+WARNING: Nan, Inf or huge value in QVEL at DOF 42. The simulation is unstable. Time = 0.7489.
+
+Fri Sep 13 00:23:46 2024
+WARNING: Nan, Inf or huge value in QACC at DOF 0. The simulation is unstable. Time = 0.6400.
+
+Fri Sep 13 00:24:03 2024
+WARNING: Nan, Inf or huge value in QACC at DOF 0. The simulation is unstable. Time = 1.4644.
+

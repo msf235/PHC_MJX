@@ -1,0 +1,8 @@
+power_scale: 1
+control_mode: "torque"
+
+kp_scale: 1.0
+kd_scale: 1.0
+pdp_scale: 1
+pdd_scale: 1
+pdi_scale: 1

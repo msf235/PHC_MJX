@@ -49,8 +49,8 @@ class HumanoidEnv(BaseEnv):
         super().__init__(cfg=self.cfg)
         self.load_humanoid_configs(cfg)
 
-        self.control_mode = self.cfg.env.control_mode
-        self.power_scale = self.cfg.env.power_scale
+        self.control_mode = self.cfg.control.control_mode
+        self.power_scale = self.cfg.control.power_scale
         assert self.control_mode in _AVAILABLE_CONTROLLERS, f"{self.control_mode} is not a valid controller {_AVAILABLE_CONTROLLERS}"
 
         self.max_episode_length = self.cfg.env.episode_length
@@ -107,8 +107,8 @@ class HumanoidEnv(BaseEnv):
         self._has_limb_weight_obs = cfg.robot.has_weight_obs
         self.has_shape_variation = cfg.robot.has_shape_variation
 
-        self._kp_scale = cfg.env.kp_scale
-        self._kd_scale = cfg.env.kd_scale
+        self._kp_scale = cfg.control.kp_scale
+        self._kd_scale = cfg.control.kd_scale
         self.cycle_motion = cfg.env.cycle_motion
         self.power_reward = cfg.env.power_reward
 
@@ -293,28 +293,15 @@ class HumanoidEnv(BaseEnv):
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
         
         
-        if self.control_mode in ["pd", "uhc_pd", "real_pd"]:
-            for idx, n in enumerate(self.actuator_names):
-                if self.humanoid_type in ["smpl", "smplh", "smplx"]:
-                    joint = "_".join(n.split("_")[:-1])
-                else:
-                    joint = n
-                
-                self.jkp[idx] = GAIS[self.control_mode][joint][0]
-                self.jkd[idx] = GAIS[self.control_mode][joint][1]
-                self.torque_lim[idx] = GAIS[self.control_mode][joint][3]
-                
-        elif self.control_mode == "simple_pid":
-            self.jki = np.zeros(self.dof_size)
-            for idx, n in enumerate(self.actuator_names):
-                if self.humanoid_type in ["smpl", "smplh", "smplx"]:
-                    joint = "_".join(n.split("_")[:-1])
-                else:
-                    joint = n
-                self.jkp[idx] = GAIS["simplepd"][joint][0]
-                self.jkd[idx] = GAIS["simplepd"][joint][1]
-                # self.jki[idx] = GAINS["simplepd"][joint][0]
-                self.torque_lim[idx] = GAIS["simplepd"][joint][3]
+        for idx, n in enumerate(self.actuator_names):
+            if self.humanoid_type in ["smpl", "smplh", "smplx"]:
+                joint = "_".join(n.split("_")[:-1])
+            else:
+                joint = n
+            
+            self.jkp[idx] = GAIS[self.control_mode][joint][0]
+            self.jkd[idx] = GAIS[self.control_mode][joint][1]
+            self.torque_lim[idx] = GAIS[self.control_mode][joint][3]
             
         if self.clip_actions:
             self._pd_action_scale = 0.5 * (lim_high - lim_low)
@@ -359,9 +346,8 @@ class HumanoidEnv(BaseEnv):
         
     
     def compute_torque(self, ctrl):
-        ctrl_joint = ctrl[:self.dof_size]
         # ctrl_joint[:] = 0; # ctrl_joint[self.actuator_names.index("L_Ankle_x")] = 1/2 # Debugging
-        torque = self.ctrler.control(ctrl_joint, self.mj_model, self.mj_data)
+        torque = self.ctrler.control(ctrl, self.mj_model, self.mj_data)
         
         # np.set_printoptions(precision=4, suppress=1)
         # print(torque, torque.max(), torque.min())
@@ -397,7 +383,6 @@ class HumanoidEnv(BaseEnv):
         for i in range(self.control_freq_inv):
             if not self.paused:
                 torque = self.compute_torque(actions)
-                # np.set_printoptions(precision=4, suppress=1); print( np.abs(torque).max(), np.abs(torque).min())
                 self.mj_data.ctrl[:] = torque
                 mujoco.mj_step(self.mj_model, self.mj_data)
                 self.curr_power_usage.append(np.abs(torque * self.get_qvel()[6:][self.q_subsetter]))

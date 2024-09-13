@@ -3,6 +3,7 @@ defaults:
   - env: base_env
   - robot: smpl_humanoid
   - learning: simple_mlp
+  - control: stable_pd
 
 notes: "Default Notes"
 project: phc_real
