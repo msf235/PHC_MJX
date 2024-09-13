@@ -1,7 +1,7 @@
 
 
 SMPL_GAINS = {}
-SMPL_GAINS["stablepd"] = {
+SMPL_GAINS["uhc_pd"] = {
     # # Much bigger
     "L_Hip":      [800, 80, 1, 1000],
     "L_Knee":     [800, 80, 1, 1000],

@@ -181,7 +181,6 @@ class StablePDController:
         M.resize(nv, nv)
         M = M[: self.qvel_lim, : self.qvel_lim]
         C = mj_data.qfrc_bias.copy()[: self.qvel_lim]
-        import ipdb; ipdb.set_trace()
         K_p = np.diag(k_p)
         K_d = np.diag(k_d)
         q_accel = cho_solve(
