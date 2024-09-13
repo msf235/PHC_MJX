@@ -9,7 +9,7 @@ import numpy as np
 ### Mujoco-related imports
 import mujoco
 ### SMPL
-# from smpl_sim.envs.humanoid_env import HumanoidEnv
+# from phc_mjx.envs.humanoid_env import HumanoidEnv
 from omegaconf import OmegaConf
 import gymnasium as gym
 from tqdm import tqdm
@@ -69,7 +69,7 @@ def make_env_mj(cfg_str, num_envs):
     cfg = OmegaConf.create(cfg_str)
 
     def thunk():
-        from smpl_sim.envs.tasks import HumanoidEnv
+        from phc_mjx.envs.tasks import HumanoidEnv
         env = eval(cfg.env.task)(cfg)
         return env
     

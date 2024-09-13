@@ -15,7 +15,7 @@ import imageio
 import mujoco
 print(f"mujoco.__version__: {mujoco.__version__}")
 ### SMPL
-import smpl_sim.envs as mjhum
+import phc_mjx.envs as mjhum
 
 motions = joblib.load("sample_data/amass_isaac_standing_upright_slim.pkl")
 print(f"number of motions: {len(motions)}")

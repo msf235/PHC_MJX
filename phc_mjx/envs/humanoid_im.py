@@ -6,13 +6,13 @@ import mujoco
 from collections import defaultdict
 import copy
 
-from smpl_sim.envs.humanoid_task import HumanoidTask
-import smpl_sim.utils.np_transform_utils as npt_utils
-from smpl_sim.utils.mujoco_utils import add_visual_capsule
+from phc_mjx.envs.humanoid_task import HumanoidTask
+import phc_mjx.utils.np_transform_utils as npt_utils
+from phc_mjx.utils.mujoco_utils import add_visual_capsule
 from easydict import EasyDict
-from smpl_sim.smpllib.motion_lib_smpl import MotionLibSMPL
-from smpl_sim.smpllib.motion_lib_base import FixHeightMode
-from smpl_sim.envs.humanoid_env import HumanoidEnv
+from phc_mjx.smpllib.motion_lib_smpl import MotionLibSMPL
+from phc_mjx.smpllib.motion_lib_base import FixHeightMode
+from phc_mjx.envs.humanoid_env import HumanoidEnv
 
 
 

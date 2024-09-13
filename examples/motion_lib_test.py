@@ -16,7 +16,7 @@ import imageio
 import mujoco
 print(f"mujoco.__version__: {mujoco.__version__}")
 ### SMPL
-from smpl_sim.envs.humanoid_env import HumanoidEnv
+from phc_mjx.envs.humanoid_env import HumanoidEnv
 import yaml
 try:
     # Python < 3.9
@@ -26,12 +26,12 @@ except ImportError:
 import hydra
 from scipy.spatial.transform import Rotation as sRot
 from omegaconf import DictConfig, OmegaConf
-from smpl_sim.smpllib.motion_lib_smpl import MotionLibSMPL
+from phc_mjx.smpllib.motion_lib_smpl import MotionLibSMPL
 import torch
 from easydict import EasyDict
-from smpl_sim.smpllib.motion_lib_base import FixHeightMode
+from phc_mjx.smpllib.motion_lib_base import FixHeightMode
 
-@hydra.main(version_base=None, config_path=str(files('smpl_sim').joinpath('data/cfg')), config_name="config")
+@hydra.main(version_base=None, config_path=str(files('phc_mjx').joinpath('data/cfg')), config_name="config")
 def main(cfg : DictConfig) -> None:
     # motions = joblib.load("sample_data/amass_isaac_standing_upright_slim.pkl")
     device = torch.device("cpu")

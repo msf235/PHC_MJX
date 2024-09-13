@@ -16,7 +16,7 @@ import imageio
 import mujoco
 print(f"mujoco.__version__: {mujoco.__version__}")
 ### SMPL
-# from smpl_sim.envs.humanoid_env import HumanoidEnv
+# from phc_mjx.envs.humanoid_env import HumanoidEnv
 import yaml
 try:
     # Python < 3.9
@@ -26,12 +26,11 @@ except ImportError:
 import hydra
 from omegaconf import DictConfig, OmegaConf
 import mediapy as media
-from smpl_sim.envs.tasks import *
+from phc_mjx.envs.tasks import *
 
-@hydra.main(version_base=None, config_path=str(files('smpl_sim').joinpath('data/cfg')), config_name="config")
+@hydra.main(version_base=None, config_path=str(files('phc_mjx').joinpath('data/cfg')), config_name="config")
 def main(cfg : DictConfig) -> None:
-    motions = joblib.load("sample_data/amass_isaac_standing_upright_slim.pkl")
-    print(f"number of motions: {len(motions)}")
+    
     # env = HumanoidEnv(cfg)
     cfg.env.camera = "back"
     env = eval(cfg.env.task)(cfg)
@@ -42,7 +41,6 @@ def main(cfg : DictConfig) -> None:
     if cfg.env.render_mode == "rgb_array":
         max_T = 1
     frames = []
-    env.robot.write_xml("smpl_humanoid.xml")
     while True:
         action = np.zeros(env.mj_data.ctrl.shape[0]) 
         action[:] = 0

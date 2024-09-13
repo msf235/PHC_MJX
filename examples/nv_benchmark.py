@@ -10,14 +10,14 @@ import isaacgym
 ### Mujoco-related imports
 import mujoco
 ### SMPL
-# from smpl_sim.envs.humanoid_env import HumanoidEnv
+# from phc_mjx.envs.humanoid_env import HumanoidEnv
 from omegaconf import OmegaConf
 import gymnasium as gym
 from tqdm import tqdm
 
-from smpl_sim.envs.nv.humanoid import Humanoid
-from smpl_sim.envs.nv.gymwrapper import GymVectEnv
-from smpl_sim.envs.nv.utils.config import set_np_formatting, set_seed, get_args, parse_sim_params, load_cfg
+from phc_mjx.envs.nv.humanoid import Humanoid
+from phc_mjx.envs.nv.gymwrapper import GymVectEnv
+from phc_mjx.envs.nv.utils.config import set_np_formatting, set_seed, get_args, parse_sim_params, load_cfg
 import torch
 import os.path as osp
 
@@ -113,7 +113,7 @@ def process_config(args):
     # you can also specify an absolute path
     cfg["data"]["amass_isaac_gender_betas"] = "sample_data/amass_isaac_gender_betas.pkl"
     cfg["data"]["amass_isaac_gender_betas_unique"] = "sample_data/amass_isaac_gender_betas_unique.pkl"
-    cfg["data"]["smpl_template_file"] = "smpl_sim/data/assets/mjcf/humanoid_template_local.xml"
+    cfg["data"]["smpl_template_file"] = "phc_mjx/data/assets/mjcf/humanoid_template_local.xml"
     cfg["data"]["smpl_folder"] = "data/smpl"
     return args, cfg, cfg_train
 
@@ -122,8 +122,8 @@ def make_env_nv(num_envs):
     droot = ""
     args = get_args()
     args.task = "Humanoid"
-    args.cfg_env = osp.join(droot,"smpl_sim/envs/nv/data/cfg/phc_kp_mcp_iccv.yaml")
-    args.cfg_train = osp.join(droot,"smpl_sim/envs/nv/data/cfg/train/rlg/im_mcp.yaml")
+    args.cfg_env = osp.join(droot,"phc_mjx/envs/nv/data/cfg/phc_kp_mcp_iccv.yaml")
+    args.cfg_train = osp.join(droot,"phc_mjx/envs/nv/data/cfg/train/rlg/im_mcp.yaml")
     # args.motion_file = osp.join(droot,"sample_data/amass_isaac_standing_upright_slim.pkl")
     # args.motion_file = osp.join(droot,"sample_data/amass_isaac_standing_upright_slim.pkl")
     args.num_envs = num_envs

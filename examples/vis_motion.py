@@ -16,15 +16,15 @@ import imageio
 import mujoco
 print(f"mujoco.__version__: {mujoco.__version__}")
 ### SMPL
-from smpl_sim.envs.humanoid_env import HumanoidEnv
+from phc_mjx.envs.humanoid_env import HumanoidEnv
 import yaml
 from importlib.resources import files
 import hydra
 from scipy.spatial.transform import Rotation as sRot
 from omegaconf import DictConfig, OmegaConf
-import smpl_sim.utils.np_transform_utils as npt_utils
+import phc_mjx.utils.np_transform_utils as npt_utils
 
-@hydra.main(version_base=None, config_path=str(files('smpl_sim').joinpath('data/cfg')), config_name="config")
+@hydra.main(version_base=None, config_path=str(files('phc_mjx').joinpath('data/cfg')), config_name="config")
 def main(cfg : DictConfig) -> None:
     # motions = joblib.load("sample_data/amass_isaac_standing_upright_slim.pkl")
     

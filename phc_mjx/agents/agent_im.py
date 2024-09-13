@@ -16,18 +16,18 @@ import wandb
 import numpy as np
 import multiprocessing
 
-from smpl_sim.agents.agent_humanoid import AgentHumanoid
-from smpl_sim.learning.memory import Memory
-from smpl_sim.learning.policy_gaussian import PolicyGaussian
-from smpl_sim.learning.critic import Value
-from smpl_sim.learning.policy_mcp import PolicyMCP
-from smpl_sim.learning.mlp import MLP
-from smpl_sim.learning.logger_txt import create_logger
-from smpl_sim.utils.flags import flags
-from smpl_sim.learning.learning_utils import to_test, to_device, to_cpu, get_optimizer
-from smpl_sim.envs.tasks import *
+from phc_mjx.agents.agent_humanoid import AgentHumanoid
+from phc_mjx.learning.memory import Memory
+from phc_mjx.learning.policy_gaussian import PolicyGaussian
+from phc_mjx.learning.critic import Value
+from phc_mjx.learning.policy_mcp import PolicyMCP
+from phc_mjx.learning.mlp import MLP
+from phc_mjx.learning.logger_txt import create_logger
+from phc_mjx.utils.flags import flags
+from phc_mjx.learning.learning_utils import to_test, to_device, to_cpu, get_optimizer
+from phc_mjx.envs.tasks import *
 from phc_mjx.envs.humanoid_im import *
-from smpl_sim.smpllib.smpl_eval import compute_metrics_lite
+from phc_mjx.smpllib.smpl_eval import compute_metrics_lite
 
 
 class AgentIM(AgentHumanoid):

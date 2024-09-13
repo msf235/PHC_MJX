@@ -4,7 +4,7 @@
 
 ### Commands:
 
-This repository depends on [smpl_sim](https://github.com/ZhengyiLuo/SMPLSim)
+This repository depends on [phc_mjx](https://github.com/ZhengyiLuo/SMPLSim)
 pip install git+https://github.com/ZhengyiLuo/SMPLSim.git@master
 
 ```

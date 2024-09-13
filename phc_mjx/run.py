@@ -16,7 +16,7 @@ import torch
 import numpy as np
 import wandb
 
-from smpl_sim.utils.flags import flags
+from phc_mjx.utils.flags import flags
 from phc_mjx.agents import agent_dict
 from omegaconf import DictConfig, OmegaConf
 
@@ -30,7 +30,7 @@ import hydra
 
 @hydra.main(
     version_base=None,
-    config_path="../phc_mjx/cfg",
+    config_path="../phc_mjx/data/cfg",
     config_name="config",
 )
 def main(cfg: DictConfig) -> None:

@@ -1,0 +1,158 @@
+<mujoco model="gr2">
+    <!--This XML file was automatically generated from the URDF in bazel-out/k8-opt/bin/rt/robots/atlas/config/models/e_atlas/gr2_connect.urdf via `urdf_to_mjcf_xml`. Editing it by hand is not recommended.-->
+    <compiler angle="radian"/>
+    <asset>
+        <mesh name="l_f0dist_link" file="meshes/gr2/l_f0dist_link.stl"/>
+        <mesh name="l_f0prox_link" file="meshes/gr2/l_f0prox_link.stl"/>
+        <mesh name="l_f1dist_link" file="meshes/gr2/l_f1dist_link.stl"/>
+        <mesh name="l_f1prox_link" file="meshes/gr2/l_f1prox_link.stl"/>
+        <mesh name="l_f2dist_link" file="meshes/gr2/l_f2dist_link.stl"/>
+        <mesh name="l_f2prox_link" file="meshes/gr2/l_f2prox_link.stl"/>
+        <mesh name="l_gripper_base" file="meshes/gr2/l_gripper_base.stl"/>
+        <mesh name="l_palm_rot_link" file="meshes/gr2/l_palm_rot_link.stl"/>
+        <mesh name="r_f0dist_link" file="meshes/gr2/r_f0dist_link.stl"/>
+        <mesh name="r_f0prox_link" file="meshes/gr2/r_f0prox_link.stl"/>
+        <mesh name="r_f1dist_link" file="meshes/gr2/r_f1dist_link.stl"/>
+        <mesh name="r_f1prox_link" file="meshes/gr2/r_f1prox_link.stl"/>
+        <mesh name="r_f2dist_link" file="meshes/gr2/r_f2dist_link.stl"/>
+        <mesh name="r_f2prox_link" file="meshes/gr2/r_f2prox_link.stl"/>
+        <mesh name="r_gripper_base" file="meshes/gr2/r_gripper_base.stl"/>
+        <mesh name="r_palm_rot_link" file="meshes/gr2/r_palm_rot_link.stl"/>
+    </asset>
+    <worldbody>
+        <body name="l_gripper_base" pos="0 0 0">
+            <freejoint name="l_base"/>
+            <inertial pos="-0.00131991 0.00587754 0.030133" quat="0.605604 -0.171269 0.285492 0.722776" mass="0.468734" diaginertia="0.000441593 0.000392336 0.000251429"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_gripper_base"/>
+            <geom type="mesh" mesh="l_gripper_base"/>
+            <body name="l_f0prox_link" pos="0.015 0.02075 0.06725" quat="0.707107 0 0.707107 0">
+                <inertial pos="-0.0442993 -0.000177157 0.000195832" quat="0.49609 0.50139 0.508115 0.49429" mass="0.139091" diaginertia="7.3026e-05 7.11319e-05 1.38585e-05"/>
+                <joint name="lhand.f0.prox" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_f0prox_link"/>
+                <geom type="mesh" mesh="l_f0prox_link"/>
+                <body name="l_f0dist_link" pos="-0.069829 0 0" quat="0 1 0 0">
+                    <inertial pos="-0.0297365 -0.000949624 0.000311175" quat="0.49107 0.490672 0.508702 0.509228" mass="0.0671978" diaginertia="1.82915e-05 1.59078e-05 6.80474e-06"/>
+                    <joint name="lhand.f0.dist" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_f0dist_link"/>
+                    <geom type="mesh" mesh="l_f0dist_link"/>
+                </body>
+            </body>
+            <body name="l_f1prox_link" pos="-0.015 0.02075 0.06725" quat="0 -0.707107 0 0.707107">
+                <inertial pos="-0.0442993 -0.000177157 0.000195832" quat="0.49609 0.50139 0.508115 0.49429" mass="0.139091" diaginertia="7.3026e-05 7.11319e-05 1.38585e-05"/>
+                <joint name="lhand.f1.prox" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_f1prox_link"/>
+                <geom type="mesh" mesh="l_f1prox_link"/>
+                <body name="l_f1dist_link" pos="-0.069829 0 0">
+                    <inertial pos="-0.0297365 -0.000949624 0.000311175" quat="0.49107 0.490672 0.508702 0.509228" mass="0.0671978" diaginertia="1.82915e-05 1.59078e-05 6.80474e-06"/>
+                    <joint name="lhand.f1.dist" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_f1dist_link"/>
+                    <geom type="mesh" mesh="l_f1dist_link"/>
+                </body>
+            </body>
+            <body name="l_palm_rot_link" pos="-0.03 -0.01925 0.0195" quat="0.0873117 -0.996181 0 0">
+                <inertial pos="-0.0129272 -0.0359394 -0.0108108" quat="0.939382 -0.294465 0.00631726 -0.175533" mass="0.168895" diaginertia="0.000102813 8.33254e-05 3.78271e-05"/>
+                <joint name="lhand.f2.flex" pos="0 0 0" axis="0 0 1" range="-3.14159 0" actuatorfrcrange="-5 5" armature="0.00044959999"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_palm_rot_link"/>
+                <geom type="mesh" mesh="l_palm_rot_link"/>
+                <body name="l_f2prox_link" pos="-0.015 -0.047684 -0.040079" quat="0.0617387 0.704406 0.0617387 0.704406">
+                    <inertial pos="-0.0442993 -0.000177157 0.000195832" quat="0.49609 0.50139 0.508115 0.49429" mass="0.139091" diaginertia="7.3026e-05 7.11319e-05 1.38585e-05"/>
+                    <joint name="lhand.f2.prox" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_f2prox_link"/>
+                    <geom type="mesh" mesh="l_f2prox_link"/>
+                    <body name="l_f2dist_link" pos="-0.069829 0 0" quat="0 1 0 0">
+                        <inertial pos="-0.0297365 -0.000949624 0.000311175" quat="0.49107 0.490672 0.508702 0.509228" mass="0.0671978" diaginertia="1.82915e-05 1.59078e-05 6.80474e-06"/>
+                        <joint name="lhand.f2.dist" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="l_f2dist_link"/>
+                        <geom type="mesh" mesh="l_f2dist_link"/>
+                    </body>
+                </body>
+            </body>
+        </body>
+        <body name="r_gripper_base" pos="-0.3 0 0">
+            <freejoint name="r_base"/>
+            <inertial pos="0.00131991 0.00587754 0.030133" quat="0.722776 -0.285492 0.171269 0.605604" mass="0.468734" diaginertia="0.000441593 0.000392336 0.000251429"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_gripper_base"/>
+            <geom type="mesh" mesh="r_gripper_base"/>
+            <body name="r_f0prox_link" pos="-0.015 0.02075 0.06725" quat="0 -0.707107 0 0.707107">
+                <inertial pos="-0.0442993 -0.000177157 0.000195832" quat="0.49609 0.50139 0.508115 0.49429" mass="0.139091" diaginertia="7.3026e-05 7.11319e-05 1.38585e-05"/>
+                <joint name="rhand.f0.prox" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_f0prox_link"/>
+                <geom type="mesh" mesh="r_f0prox_link"/>
+                <body name="r_f0dist_link" pos="-0.069829 0 0">
+                    <inertial pos="-0.0297365 -0.000949624 0.000311175" quat="0.49107 0.490672 0.508702 0.509228" mass="0.0671978" diaginertia="1.82915e-05 1.59078e-05 6.80474e-06"/>
+                    <joint name="rhand.f0.dist" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_f0dist_link"/>
+                    <geom type="mesh" mesh="r_f0dist_link"/>
+                </body>
+            </body>
+            <body name="r_f1prox_link" pos="0.015 0.02075 0.06725" quat="0.707107 0 0.707107 0">
+                <inertial pos="-0.0442993 -0.000177157 0.000195832" quat="0.49609 0.50139 0.508115 0.49429" mass="0.139091" diaginertia="7.3026e-05 7.11319e-05 1.38585e-05"/>
+                <joint name="rhand.f1.prox" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_f1prox_link"/>
+                <geom type="mesh" mesh="r_f1prox_link"/>
+                <body name="r_f1dist_link" pos="-0.069829 0 0" quat="0 1 0 0">
+                    <inertial pos="-0.0297365 -0.000949624 0.000311175" quat="0.49107 0.490672 0.508702 0.509228" mass="0.0671978" diaginertia="1.82915e-05 1.59078e-05 6.80474e-06"/>
+                    <joint name="rhand.f1.dist" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_f1dist_link"/>
+                    <geom type="mesh" mesh="r_f1dist_link"/>
+                </body>
+            </body>
+            <body name="r_palm_rot_link" pos="0.03 -0.01925 0.0195" quat="0 0 -0.0873117 0.996181">
+                <inertial pos="-0.0129272 -0.0359394 0.0108108" quat="0.939382 0.294465 -0.00631726 -0.175533" mass="0.168895" diaginertia="0.000102813 8.33254e-05 3.78271e-05"/>
+                <joint name="rhand.f2.flex" pos="0 0 0" axis="0 0 1" range="-3.14159 0" actuatorfrcrange="-5 5" armature="0.00044959999"/>
+                <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_palm_rot_link"/>
+                <geom type="mesh" mesh="r_palm_rot_link"/>
+                <body name="r_f2prox_link" pos="-0.015 -0.047684 0.040079" quat="0.704406 0.0617387 0.704406 0.0617387">
+                    <inertial pos="-0.0442993 -0.000177157 0.000195832" quat="0.49609 0.50139 0.508115 0.49429" mass="0.139091" diaginertia="7.3026e-05 7.11319e-05 1.38585e-05"/>
+                    <joint name="rhand.f2.prox" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_f2prox_link"/>
+                    <geom type="mesh" mesh="r_f2prox_link"/>
+                    <body name="r_f2dist_link" pos="-0.069829 0 0">
+                        <inertial pos="-0.0297365 -0.000949624 0.000311175" quat="0.49107 0.490672 0.508702 0.509228" mass="0.0671978" diaginertia="1.82915e-05 1.59078e-05 6.80474e-06"/>
+                        <joint name="rhand.f2.dist" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-5 5" damping="1.8" armature="0.00044959999"/>
+                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="r_f2dist_link"/>
+                        <geom type="mesh" mesh="r_f2dist_link"/>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+    <actuator>
+        <motor name="lhand.f0.dist" joint="lhand.f0.dist" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="lhand.f0.prox" joint="lhand.f0.prox" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="lhand.f1.dist" joint="lhand.f1.dist" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="lhand.f1.prox" joint="lhand.f1.prox" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="lhand.f2.dist" joint="lhand.f2.dist" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="lhand.f2.prox" joint="lhand.f2.prox" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="lhand.f2.flex" joint="lhand.f2.flex" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f0.dist" joint="rhand.f0.dist" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f0.prox" joint="rhand.f0.prox" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f1.dist" joint="rhand.f1.dist" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f1.prox" joint="rhand.f1.prox" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f2.dist" joint="rhand.f2.dist" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f2.prox" joint="rhand.f2.prox" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+        <motor name="rhand.f2.flex" joint="rhand.f2.flex" gear="40 0 0 0 0 0" ctrllimited="true" ctrlrange="-0.125 0.125"/>
+    </actuator>
+    <contact>
+        <exclude body1="r_gripper_base" body2="r_f2prox_link"/>
+        <exclude body1="r_f0prox_link" body2="r_f1prox_link"/>
+        <exclude body1="r_f0prox_link" body2="r_f1dist_link"/>
+        <exclude body1="r_f0dist_link" body2="r_f1prox_link"/>
+        <exclude body1="r_f0dist_link" body2="r_f1dist_link"/>
+        <exclude body1="r_f1prox_link" body2="r_palm_rot_link"/>
+        <exclude body1="r_f1prox_link" body2="r_f2prox_link"/>
+        <exclude body1="r_f1prox_link" body2="r_f2dist_link"/>
+        <exclude body1="r_f1dist_link" body2="r_f2prox_link"/>
+        <exclude body1="r_f1dist_link" body2="r_f2dist_link"/>
+        <exclude body1="l_gripper_base" body2="l_f2prox_link"/>
+        <exclude body1="l_f0prox_link" body2="l_f1prox_link"/>
+        <exclude body1="l_f0prox_link" body2="l_f1dist_link"/>
+        <exclude body1="l_f0dist_link" body2="l_f1prox_link"/>
+        <exclude body1="l_f0dist_link" body2="l_f1dist_link"/>
+        <exclude body1="l_f1prox_link" body2="l_palm_rot_link"/>
+        <exclude body1="l_f1prox_link" body2="l_f2prox_link"/>
+        <exclude body1="l_f1prox_link" body2="l_f2dist_link"/>
+        <exclude body1="l_f1dist_link" body2="l_f2prox_link"/>
+        <exclude body1="l_f1dist_link" body2="l_f2dist_link"/>
+    </contact>
+</mujoco>
