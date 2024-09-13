@@ -261,7 +261,7 @@ class HumanoidEnv(BaseEnv):
         elif self.control_mode == "simple_pid":
             self.ctrler = ctrls.SimplePID(self.jkp/10, np.ones_like(self.jkp), self.jkd/10, self.mj_model.opt.timestep*self.control_freq_inv,self.torque_lim, self._pd_action_scale, self._pd_action_offset)
         elif self.control_mode == "torque":
-            self.ctrler = ctrls.SimpleTorqueController(self.power_scale*self.torque_lim, self.torque_lim)
+            self.ctrler = ctrls.SimpleTorqueController(self.power_scale, self.torque_lim)
             
         
     def build_pd_action_scale(self):
@@ -384,6 +384,7 @@ class HumanoidEnv(BaseEnv):
             if not self.paused:
                 torque = self.compute_torque(actions)
                 self.mj_data.ctrl[:] = torque
+                # np.set_printoptions(precision=4, suppress=1); print(torque.max(), torque.min())
                 mujoco.mj_step(self.mj_model, self.mj_data)
                 self.curr_power_usage.append(np.abs(torque * self.get_qvel()[6:][self.q_subsetter]))
                 
