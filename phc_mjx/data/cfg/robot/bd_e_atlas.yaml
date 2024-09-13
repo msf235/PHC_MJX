@@ -17,3 +17,4 @@ box_body: True
 smpl_data_dir: data/smpl
 create_vel_sensors: False
 xml_file: phc_mjx/data/robot/bd/e_atlas_r1_zen.xml
+contact_bodies: ["l_foot", "r_foot"]

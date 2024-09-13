@@ -84,7 +84,7 @@ class HumanoidEnv(BaseEnv):
 
     def load_humanoid_configs(self, cfg):
         self.humanoid_type = cfg.robot.humanoid_type
-        self.contact_bodies = self.cfg.env.contact_bodies
+        self.contact_bodies = self.cfg.robot.contact_bodies
         
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             self.load_smpl_configs(cfg)
@@ -203,11 +203,11 @@ class HumanoidEnv(BaseEnv):
         self.qpos_lim = np.max(self.mj_model.jnt_qposadr) + self.mj_model.jnt_qposadr[-1] - self.mj_model.jnt_qposadr[-2]
         self.qvel_lim = np.max(self.mj_model.jnt_dofadr) + self.mj_model.jnt_dofadr[-1] - self.mj_model.jnt_dofadr[-2]
         
+        body_type_id = mujoco.mju_str2Type("body")
         geom_type_id = mujoco.mju_str2Type("geom")
-        
-        
-        self.contact_bodies_ids = [mujoco.mj_name2id(self.mj_model, geom_type_id, name) for name in self.contact_bodies]
+        self.contact_bodies_ids = [mujoco.mj_name2id(self.mj_model, body_type_id, name) for name in self.contact_bodies]
         self.floor_idx = mujoco.mj_name2id(self.mj_model, geom_type_id, "floor")
+        
         self.q_subsetter = None
         
         ################## Humanoid Character Properties ##################
@@ -229,7 +229,7 @@ class HumanoidEnv(BaseEnv):
         elif self.humanoid_type in ["bd_e_atlas"]:
             if self.self_obs_v == 1:
                 self._num_self_obs = (1 if self._root_height_obs else 0) \
-                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * 6 + 3 + 3  + self.mj_model.nv
+                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * 6 + 3 + 3  + (self.mj_model.nv - 6)
             elif self.self_obs_v == 2:
                 assert(self.cfg.robot.create_vel_sensors)
                 self._num_self_obs = (1 if self._root_height_obs else 0) \
@@ -353,7 +353,7 @@ class HumanoidEnv(BaseEnv):
             body_vel = self.get_body_linear_vel()[None,]
             body_ang_vel = self.get_body_angular_vel()[None,]
             obs_dict =  compute_humanoid_self_obs_v2(body_pos, body_rot, body_vel, body_ang_vel, self.upright_start, self._root_height_obs,  humanoid_type = self.humanoid_type)
-        import ipdb; ipdb.set_trace()b
+        
         return np.concatenate([v.ravel() for v in obs_dict.values()], axis=0, dtype=self.dtype)
         # return obs # we need to change the definition of spaces if we want to keep the dictionary
         
@@ -426,8 +426,14 @@ class HumanoidEnv(BaseEnv):
                 self.mj_data.qvel[:] = 0
                 self.mj_data.qpos[2] = 0.94
                 self.mj_data.qpos[3:7] = np.array([0.5, 0.5, 0.5, 0.5])
+            elif self.humanoid_type in ["bd_e_atlas"]:
+                self.mj_data.qpos[:] = 0
+                self.mj_data.qvel[:] = 0
+                self.mj_data.qpos[2] = 1.12
+            else:
+                raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
         elif self.state_init == HumanoidEnv.StateInit.Fall:
-            if self.humanoid_type in ["smpl", "smplh", "smplx"]:
+            if self.humanoid_type in ["smpl", "smplh", "smplx", "bd_e_atlas"]:
                 self.mj_data.qpos[:] = 0
                 self.mj_data.qvel[:] = 0
                 self.mj_data.qpos[2] = 0.3
@@ -440,6 +446,8 @@ class HumanoidEnv(BaseEnv):
                         torque = self.compute_torque(action)
                         self.mj_data.ctrl[:] = torque
                         mujoco.mj_step(self.mj_model, self.mj_data)                
+            else:
+                raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
 
 
     def reset_humanoid(self):

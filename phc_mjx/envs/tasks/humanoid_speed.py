@@ -84,9 +84,10 @@ class HumanoidSpeed(HumanoidTask):
         terminated, truncated = False, False
         pass_time = self.cur_t > self.max_episode_length
         select_floor = self.mj_data.contact.geom1 == self.floor_idx
-        all_legal_contacts = np.isin(self.mj_data.contact.geom2[select_floor], self.contact_bodies_ids).all()
+        all_legal_contacts = np.isin(self.mj_model.geom_bodyid[self.mj_data.contact.geom2[select_floor]], self.contact_bodies_ids).all()
         truncated = pass_time 
         terminated = (not all_legal_contacts)
+        
         return terminated, truncated
     
     def update_task(self):

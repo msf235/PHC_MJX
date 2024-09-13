@@ -24,4 +24,3 @@ tar_speed_min: 0.0
 tar_speed_max: 5.0
 speed_change_steps_min: 100
 speed_change_steps_max: 200
-contact_bodies: ["R_Ankle", "L_Ankle", "R_Toe", "L_Toe"]

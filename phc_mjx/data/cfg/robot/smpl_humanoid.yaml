@@ -16,3 +16,4 @@ real_weight: True
 box_body: True
 smpl_data_dir: data/smpl
 create_vel_sensors: True
+contact_bodies: ["R_Ankle", "L_Ankle", "R_Toe", "L_Toe"]
