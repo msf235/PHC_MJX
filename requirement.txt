@@ -35,5 +35,3 @@ open3d
 hydra-core 
 gymnasium
 dm_env
-wheel
-mediapy
