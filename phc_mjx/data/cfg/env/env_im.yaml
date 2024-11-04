@@ -1,4 +1,6 @@
 task: HumanoidIm
+motion_file: "data/amass/amass_copycat_take6_test.pkl"
+motion_file_type: "smpl"
 note: this is the default config file for humanoid_env
 episode_length: 300
 sim_timestep_inv: 450
@@ -30,7 +32,6 @@ power_coefficient: 0.00005
 
 shape_resampling_interval: 100
 
-motion_file: "data/amass/amass_copycat_take6_test.pkl"
 termination_distance: 0.25
 reward_specs:
   "k_pos": 100

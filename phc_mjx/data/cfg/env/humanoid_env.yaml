@@ -1,5 +1,6 @@
 task: HumanoidEnv
 note: this is the default config file for humanoid_env
+motion_file: ""
 episode_length: 300
 sim_timestep_inv: 450
 control_frequency_inv: 15

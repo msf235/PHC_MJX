@@ -13,7 +13,7 @@ from easydict import EasyDict
 from phc_mjx.smpllib.motion_lib_smpl import MotionLibSMPL
 from phc_mjx.smpllib.motion_lib_base import FixHeightMode
 from phc_mjx.envs.humanoid_env import HumanoidEnv
-
+from phc_mjx.utils.motion_lib_mujoco import MotionLibMujoco
 
 
 class HumanoidIm(HumanoidTask):
@@ -34,7 +34,13 @@ class HumanoidIm(HumanoidTask):
         self.im_obs_v = cfg.env.im_obs_v
         self.im_reward_v = cfg.env.im_reward_v
         super().__init__(cfg)
-        self.setup_motionlib()
+        self.motion_file_type = cfg.env.get("motion_file_type", "smpl")
+        if self.motion_file_type == "smpl":
+            self.setup_motionlib()
+        elif self.motion_file_type == "mujoco":
+            self.setup_motion_mujoco()
+        else:
+            raise NotImplementedError("Unknown motion file type")
         
     def create_task_visualization(self):
         if self.viewer is not None: # this implies that headless == False
@@ -67,6 +73,14 @@ class HumanoidIm(HumanoidTask):
         
         self.track_bodies_id = [self.body_names_orig.index(j) for j in self.track_bodies]
         self.reset_bodies_id = [self.body_names_orig.index(j) for j in self.reset_bodies]
+
+    def setup_motion_data(self): # should this be named setup_motion_sampler?
+        if self.motion_file_type == "smpl":
+            self.setup_motionlib()
+        elif self.motion_file_type == "mujoco": # Calling this 'mujoco' for consistency, but probably should be called 'spatial' or something
+            self.setup_motion_mujoco()
+        else:
+            raise NotImplementedError("Unknown motion file type")
         
     def setup_motionlib(self):
         self.motion_lib_cfg = EasyDict({
@@ -89,6 +103,19 @@ class HumanoidIm(HumanoidTask):
         self._motion_start_times = np.zeros(1)
         self._motion_start_times_offset = np.zeros(1)
         return
+
+    def setup_motion_mujoco(self):
+        self.motion_lib_cfg = EasyDict({  # TODO: rename
+            "motion_file": self.cfg.env.motion_file,
+            "device": torch.device("cpu"),
+            "fix_height": FixHeightMode.full_fix,
+            "min_length": -1,
+            "max_length": -1,
+            "multi_thread": True if self.cfg.num_threads > 1 else False,
+            "smpl_type": None,
+            "randomrize_heading": not self.test,
+        })
+        self.motion_lib = MotionLibMujoco(self.motion_lib_cfg)
     
     def resample_motions(self):
         self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas * min(self.num_motion_max, self.motion_lib.num_all_motions()), random_sample = True)

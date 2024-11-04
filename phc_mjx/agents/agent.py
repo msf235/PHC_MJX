@@ -69,7 +69,7 @@ class Agent:
         self.pre_sample()
 
         while logger.num_steps < min_batch_size:
-            
+             
             obs_dict, info = self.env.reset()
             state = self.preprocess_obs(obs_dict) # let's assume that the environment always return a np.ndarray (see https://gymnasium.farama.org/api/wrappers/observation_wrappers/#gymnasium.wrappers.FlattenObservation)
             logger.start_episode(self.env)
@@ -113,7 +113,7 @@ class Agent:
 
     def sample(self, min_batch_size):
         t_start = time.time()
-        to_test(*self.sample_modules) # Sending test modeuls to cpu!!!
+        to_test(*self.sample_modules) # Sending test models to cpu!!!
         with to_cpu(*self.sample_modules):
             with torch.no_grad():
                 thread_batch_size = int(math.floor(min_batch_size / self.num_threads))
