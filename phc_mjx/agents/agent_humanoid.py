@@ -197,6 +197,7 @@ class AgentHumanoid(AgentPPO):
 
     def optimize_policy(self,save_model=True):
         starting_epoch = self.epoch
+        breakpoint()
         for _ in range(starting_epoch, self.cfg.learning.max_epoch):
             info = {}
             t0 = time.time()

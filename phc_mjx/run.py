@@ -71,6 +71,7 @@ def main(cfg: DictConfig) -> None:
     torch.manual_seed(cfg.seed)
 
     breakpoint()
+
     agent = agent_dict[cfg.learning.agent_name](
         cfg, dtype, device, training=True, checkpoint_epoch=cfg.epoch
     )
