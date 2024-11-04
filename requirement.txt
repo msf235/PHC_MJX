@@ -1,6 +1,5 @@
 numpy-stl
 vtk
-patchelf
 termcolor
 torchgeometry
 scikit-image
@@ -20,10 +19,8 @@ lxml
 autograd
 scikit-learn
 chumpy
-patchelf
 wandb
 pyvirtualdisplay
-patchelf
 lxml
 ipdb
 chardet
@@ -35,3 +32,5 @@ open3d
 hydra-core 
 gymnasium
 dm_env
+wheel
+mediapy

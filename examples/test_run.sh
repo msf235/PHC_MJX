@@ -1,0 +1,1 @@
+python phc_mjx/run.py env=env_im env.motion_file=data/amass/amass_isaac_standing_upright_slim.pkl exp_name=im_obsv2_1 env.self_obs_v=2 headless=True test=False num_threads=1 learning.min_batch_size=256

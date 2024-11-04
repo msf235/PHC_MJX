@@ -26,6 +26,7 @@ from phc_mjx.learning.logger_txt import create_logger
 from phc_mjx.utils.flags import flags
 from phc_mjx.learning.learning_utils import to_test, to_device, to_cpu, get_optimizer
 from phc_mjx.envs.tasks import *
+from phc_mjx.envs import *
 
 
 class AgentHumanoid(AgentPPO):
