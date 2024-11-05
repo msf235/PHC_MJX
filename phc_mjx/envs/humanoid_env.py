@@ -377,7 +377,6 @@ class HumanoidEnv(BaseEnv):
 
     def physics_step(self, actions):
         # if not self.action_space.contains(actions):
-        # breakpoint()
         # self.render() This is done in the base class
         self.curr_power_usage = []
         for i in range(self.control_freq_inv):

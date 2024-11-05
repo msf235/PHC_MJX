@@ -172,8 +172,8 @@ class MotionLibBase():
             
         self._motion_lengths = np.array(motion_lengths).astype(self.dtype)
         self._motion_fps = np.array(motion_fps).astype(self.dtype)
-        self._motion_bodies = np.stack(motion_bodies).astype(self.dtype)
-        self._motion_aa = np.concatenate(motion_aa).astype(self.dtype)
+        # self._motion_bodies = np.stack(motion_bodies).astype(self.dtype)
+        # self._motion_aa = np.concatenate(motion_aa).astype(self.dtype)
 
         self._motion_dt = np.array(motion_dt).astype(self.dtype)
         self._motion_num_frames = np.array(motion_num_frames)
@@ -318,37 +318,38 @@ class MotionLibBase():
         num_frames = self._motion_num_frames[motion_ids]
         dt = self._motion_dt[motion_ids]
 
-        frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
-        frame_idx = ((1.0 - blend) * frame_idx0 + blend * frame_idx1).astype(int)
-        fl = frame_idx + self.length_starts[motion_ids]
+        # frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
+        # frame_idx = ((1.0 - blend) * frame_idx0 + blend * frame_idx1).astype(int)
+        # fl = frame_idx + self.length_starts[motion_ids]
+        fl = self._calc_frame_interval(motion_times, motion_len, num_frames, dt)
 
-        dof_pos = self.dof_pos[fl]
-        body_vel = self.gvs[fl]
-        body_ang_vel = self.gavs[fl]
+        # dof_pos = self.dof_pos[fl]
+        # body_vel = self.gvs[fl]
+        # body_ang_vel = self.gavs[fl]
         xpos = self.gts[fl, :]
         xquat = self.grs[fl]
-        dof_vel = self.dvs[fl]
+        # dof_vel = self.dvs[fl]
         qpos = self.qpos[fl]
         qvel = self.qvel[fl]
 
-        vals = [dof_pos, body_vel, body_ang_vel, xpos, dof_vel]
+        # vals = [dof_pos, body_vel, body_ang_vel, xpos, dof_vel]
 
         if not offset is None:
             xpos = xpos + offset[..., None, :]  # ZL: apply offset
-
+        breakpoint()
         return EasyDict({
-            "root_pos": xpos[..., 0, :].copy(),
-            "root_rot": xquat[..., 0, :].copy(),
-            "dof_pos": dof_pos.copy(),
-            "root_vel": body_vel[..., 0, :].copy(),
-            "root_ang_vel": body_ang_vel[..., 0, :].copy(),
-            "dof_vel": dof_vel.reshape(dof_vel.shape[0], -1),
-            "motion_aa": self._motion_aa[fl],
+            # "root_pos": xpos[..., 0, :].copy(),
+            # "root_rot": xquat[..., 0, :].copy(),
+            # "dof_pos": dof_pos.copy(),
+            # "root_vel": body_vel[..., 0, :].copy(),
+            # "root_ang_vel": body_ang_vel[..., 0, :].copy(),
+            # "dof_vel": dof_vel.reshape(dof_vel.shape[0], -1),
+            # "motion_aa": self._motion_aa[fl],
             "xpos": xpos,
             "xquat": xquat,
-            "body_vel": body_vel,
-            "body_ang_vel": body_ang_vel,
-            "motion_bodies": self._motion_bodies[motion_ids],
+            # "body_vel": body_vel,
+            # "body_ang_vel": body_ang_vel,
+            # "motion_bodies": self._motion_bodies[motion_ids],
             "qpos": qpos, 
             "qvel": qvel,
         })
@@ -454,8 +455,13 @@ class MotionLibBase():
         frame_idx1 = np.minimum(frame_idx0 + 1, num_frames - 1)
         
         blend = np.clip((time - frame_idx0 * dt) / dt, 0.0, 1.0) # clip blend to be within 0 and 1
-        
         return frame_idx0, frame_idx1, blend
+
+    def _calc_frame_interval(self, time, len, num_frames, dt):
+        frame_idx0, frame_idx1, blend = self._calc_frame_blend(time, len, num_frames, dt)
+        frame_idx = ((1.0 - blend) * frame_idx0 + blend * frame_idx1).astype(int)
+        fl = frame_idx + self.length_starts[motion_ids]
+        return fl
 
     def _get_num_bodies(self):
         return self.num_bodies

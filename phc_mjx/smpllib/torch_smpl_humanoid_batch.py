@@ -120,6 +120,7 @@ class Humanoid_Batch:
         device, dtype = pose.device, pose.dtype
         assert(len(pose.shape) == 4) # Batch, Seqlen, J, 3
         B, T = pose.shape[:2]
+        breakpoint()
         if convert_to_mat:
             pose_quat = tRot.axis_angle_to_quaternion(pose)
             pose_mat = tRot.quaternion_to_matrix(pose_quat)

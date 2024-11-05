@@ -206,7 +206,7 @@ class HumanoidIm(HumanoidTask):
             self.ref_motion_cache['offset'] = offset.copy() if not offset is None else None
         else:
             return self.ref_motion_cache
-        
+        breakpoint() 
         motion_res = self.motion_lib.get_motion_state_intervaled(motion_ids.copy(), motion_times.copy(), offset=offset)
 
         self.ref_motion_cache.update(motion_res)
@@ -229,6 +229,7 @@ class HumanoidIm(HumanoidTask):
         body_pos_subset = body_pos[..., self.track_bodies_id, :]
         body_rot_subset = body_rot[..., self.track_bodies_id, :]
         ref_pos_subset = ref_dict.xpos[..., self.track_bodies_id, :]
+        breakpoint()
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
         
         if self.im_obs_v == 1:
