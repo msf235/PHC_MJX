@@ -90,7 +90,6 @@ class AgentHumanoid(AgentPPO):
         pass
 
     def setup_env(self):
-        breakpoint()
         self.env = eval(self.cfg.env.task)(self.cfg)
 
     def setup_policy(self):

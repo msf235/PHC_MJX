@@ -145,8 +145,8 @@ class MotionLibSMPL(MotionLibBase):
             
             curr_motion = EasyDict({k: v[0] if torch.is_tensor(v) else v for k, v in curr_motion.items() })
             
-            curr_motion.gender_beta = curr_gender_beta
-            curr_motion.pose_aa = pose_aa
+            # curr_motion.gender_beta = curr_gender_beta
+            # curr_motion.pose_aa = pose_aa
             res[curr_id] = (curr_file, curr_motion)
 
         if not queue is None:
