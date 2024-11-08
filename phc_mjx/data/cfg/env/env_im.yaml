@@ -1,6 +1,7 @@
 task: HumanoidIm
 motion_file: "data/amass/amass_copycat_take6_test.pkl"
 motion_file_type: "smpl"
+model_file: ""
 note: this is the default config file for humanoid_env
 episode_length: 300
 sim_timestep_inv: 450

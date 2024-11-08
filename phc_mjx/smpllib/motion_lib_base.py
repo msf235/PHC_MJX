@@ -74,6 +74,7 @@ class MotionLibBase():
         self._num_unique_motions = len(self._motion_data_list)
         if self.mode == MotionlibMode.directory:
             self._motion_data_load = joblib.load(self._motion_data_load[0]) # set self._motion_data_load to a sample of the data 
+#         breakpoint()
 
     def setup_constants(self, fix_height = FixHeightMode.full_fix, multi_thread = True):
         self.fix_height = fix_height
@@ -108,7 +109,6 @@ class MotionLibBase():
         # motion_aa = []
 
         total_len = 0.0
-        
         self.num_joints = len(self.mesh_parsers["0"].joint_names)
         num_motion_to_load = len(shape_params)
         if random_sample:
@@ -116,6 +116,7 @@ class MotionLibBase():
         else:
             sample_idxes = np.remainder(np.arange(num_motion_to_load) + start_idx, self._num_unique_motions )
 
+        breakpoint() 
         self._curr_motion_ids = sample_idxes
         self.curr_motion_keys = self._motion_data_keys[sample_idxes]
         self._sampling_batch_prob = self._sampling_prob[self._curr_motion_ids] / self._sampling_prob[self._curr_motion_ids].sum()
@@ -143,7 +144,7 @@ class MotionLibBase():
             worker_args = (*job_args[i], queue, i)
             worker = mp.Process(target=self.load_motion_with_skeleton, args=worker_args)
             worker.start()
-        breakpoint()
+#         breakpoint()
         res_acc.update(self.load_motion_with_skeleton(*jobs[0], None, 0))
         pbar = tqdm(range(len(jobs) - 1)) if not silent else range(len(jobs) - 1)
         for i in pbar:
@@ -207,7 +208,7 @@ class MotionLibBase():
                   sample_idxes[:5], self.curr_motion_keys[:5], f"total length of {total_len:.3f}s and {self._motion_num_frames} frames.")
         else:
             print(sample_idxes[:5], end=" ")
-        breakpoint()
+#         breakpoint()
         return motions
 
     def num_current_motions(self):
@@ -339,7 +340,7 @@ class MotionLibBase():
 
         if not offset is None:
             xpos = xpos + offset[..., None, :]  # ZL: apply offset
-        breakpoint()
+#         breakpoint()
         return EasyDict({
             # "root_pos": xpos[..., 0, :].copy(),
             # "root_rot": xquat[..., 0, :].copy(),

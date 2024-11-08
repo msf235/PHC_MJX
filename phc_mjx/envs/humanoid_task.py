@@ -4,7 +4,7 @@ from phc_mjx.envs.humanoid_env import HumanoidEnv
 class HumanoidTask(HumanoidEnv):
         
     def reset(self, seed=None, options=None):
-        breakpoint()
+#         breakpoint()
         # First reset humanoid, then reset task, then reset the simulation. 
         self.reset_task(options = options)
         return super().reset(seed=seed, options=options)

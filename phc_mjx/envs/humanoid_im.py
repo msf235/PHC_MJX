@@ -93,6 +93,7 @@ class HumanoidIm(HumanoidTask):
             "smpl_type": "smpl",
             "randomrize_heading": not self.test,
         })
+        breakpoint()
         self.motion_lib = MotionLibSMPL(self.motion_lib_cfg)
         if self.test:
             self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas, random_sample = False)
@@ -107,6 +108,7 @@ class HumanoidIm(HumanoidTask):
     def setup_motion_mujoco(self):
         self.motion_lib_cfg = EasyDict({  # TODO: rename
             "motion_file": self.cfg.env.motion_file,
+            "model_file": self.cfg.env.model_file,
             "device": torch.device("cpu"),
             "fix_height": FixHeightMode.full_fix,
             "min_length": -1,
@@ -116,7 +118,9 @@ class HumanoidIm(HumanoidTask):
             "randomrize_heading": not self.test,
         })
         self.motion_lib = MotionLibMujoco(self.motion_lib_cfg)
-    
+        breakpoint()
+        self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas * min(self.num_motion_max, self.motion_lib.num_all_motions()), random_sample = True)
+
     def resample_motions(self):
         self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas * min(self.num_motion_max, self.motion_lib.num_all_motions()), random_sample = True)
     
@@ -206,7 +210,7 @@ class HumanoidIm(HumanoidTask):
             self.ref_motion_cache['offset'] = offset.copy() if not offset is None else None
         else:
             return self.ref_motion_cache
-        breakpoint() 
+#         breakpoint() 
         motion_res = self.motion_lib.get_motion_state_intervaled(motion_ids.copy(), motion_times.copy(), offset=offset)
 
         self.ref_motion_cache.update(motion_res)
@@ -229,7 +233,7 @@ class HumanoidIm(HumanoidTask):
         body_pos_subset = body_pos[..., self.track_bodies_id, :]
         body_rot_subset = body_rot[..., self.track_bodies_id, :]
         ref_pos_subset = ref_dict.xpos[..., self.track_bodies_id, :]
-        breakpoint()
+#         breakpoint()
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
         
         if self.im_obs_v == 1:

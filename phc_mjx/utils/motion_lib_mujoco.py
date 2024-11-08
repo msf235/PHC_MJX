@@ -1,13 +1,18 @@
 import torch
+import numpy as np
 import glob
 from phc_mjx.smpllib.motion_lib_base import MotionLibBase, FixHeightMode
 import os.path as osp
 import joblib
+import mujoco as mj
 
 class MotionLibMujoco(MotionLibBase):
 
     def __init__(self, motion_lib_cfg):
         super().__init__(motion_lib_cfg=motion_lib_cfg)
+        model = mj.MjModel.from_xml_path(motion_lib_cfg.model_file)
+        self.num_joints = model.njnt
+        # TODO: need to load mujoco xml file info
         return
     
     @staticmethod
@@ -44,7 +49,7 @@ class MotionLibMujoco(MotionLibBase):
         
         data_list = self._motion_data_load
         self._motion_data_list = data_list
-        self._motion_data_keys = ['data']
+        self._motion_data_keys = np.array(['data'])
 
         # if self.mode == MotionlibMode.file:
             # if min_length != -1:
@@ -61,6 +66,7 @@ class MotionLibMujoco(MotionLibBase):
         self._num_unique_motions = len(self._motion_data_list)
         # if self.mode == MotionlibMode.directory:
             # self._motion_data_load = joblib.load(self._motion_data_load[0]) # set self._motion_data_load to a sample of the data 
+#         breakpoint()
 
     def load_motions(self, m_cfg, shape_params, random_sample=True, start_idx=0, silent= False):
         # load motion load the same number of motions as there are skeletons (humanoids)
@@ -75,12 +81,14 @@ class MotionLibMujoco(MotionLibBase):
 
         total_len = 0.0
         
-        self.num_joints = len(self.mesh_parsers["0"].joint_names)
+        # self.num_joints = len(self.mesh_parsers["0"].joint_names)
         num_motion_to_load = len(shape_params)
         if random_sample:
             sample_idxes = np.random.choice(np.arange(self._num_unique_motions), size = num_motion_to_load, p = self._sampling_prob, replace=True)
         else:
             sample_idxes = np.remainder(np.arange(num_motion_to_load) + start_idx, self._num_unique_motions )
+
+        breakpoint()
 
         self._curr_motion_ids = sample_idxes
         self.curr_motion_keys = self._motion_data_keys[sample_idxes]
