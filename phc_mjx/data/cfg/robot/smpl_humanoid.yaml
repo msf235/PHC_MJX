@@ -1,5 +1,6 @@
 note: "Humanoid robot with SMPL body model."
 humanoid_type: smpl
+xml_file: ""
 has_upright_start: False
 has_shape_obs: False
 has_weight_obs: False

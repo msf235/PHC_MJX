@@ -5,6 +5,7 @@ import torch
 import mujoco
 from collections import defaultdict
 import copy
+import os.path as osp
 
 from phc_mjx.envs.humanoid_task import HumanoidTask
 import phc_mjx.utils.np_transform_utils as npt_utils
@@ -69,10 +70,18 @@ class HumanoidIm(HumanoidTask):
         super().setup_humanoid_properties()
         self.full_track_bodies = self.body_names_orig
         self.track_bodies = self.cfg.env.get("trackBodies", self.full_track_bodies)
-        self.reset_bodies = self.cfg.env.get("resetBodies", self.track_bodies)
-        
+        reset_bodies_file = self.cfg.env.get("reset_bodies_file", None)
+        if osp.isfile(reset_bodies_file):
+            reset_bodies_f = self.cfg.env.get("reset_bodies_file")
+            with open(reset_bodies_f, 'r') as file:
+                lines = file.readlines()
+                self.reset_bodies = [line.strip() for line in lines]  # Remove newline characters
+        else:
+            self.reset_bodies = self.track_bodies
+
         self.track_bodies_id = [self.body_names_orig.index(j) for j in self.track_bodies]
         self.reset_bodies_id = [self.body_names_orig.index(j) for j in self.reset_bodies]
+        breakpoint()
 
     def setup_motion_data(self): # should this be named setup_motion_sampler?
         if self.motion_file_type == "smpl":
@@ -93,7 +102,6 @@ class HumanoidIm(HumanoidTask):
             "smpl_type": "smpl",
             "randomrize_heading": not self.test,
         })
-        breakpoint()
         self.motion_lib = MotionLibSMPL(self.motion_lib_cfg)
         if self.test:
             self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas, random_sample = False)
@@ -118,8 +126,11 @@ class HumanoidIm(HumanoidTask):
             "randomrize_heading": not self.test,
         })
         self.motion_lib = MotionLibMujoco(self.motion_lib_cfg)
-        breakpoint()
         self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas * min(self.num_motion_max, self.motion_lib.num_all_motions()), random_sample = True)
+
+        self._sampled_motion_ids = np.array([0])
+        self._motion_start_times = np.zeros(1)
+        self._motion_start_times_offset = np.zeros(1)
 
     def resample_motions(self):
         self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas * min(self.num_motion_max, self.motion_lib.num_all_motions()), random_sample = True)
@@ -156,7 +167,10 @@ class HumanoidIm(HumanoidTask):
                         self.mj_data.ctrl[:] = torque
                         mujoco.mj_step(self.mj_model, self.mj_data)
         elif self.state_init == HumanoidEnv.StateInit.MoCap:
-            motion_return = self.get_state_from_motionlib_cache(self._sampled_motion_ids, self._motion_start_times, self.global_offset)
+            motion_return = self.get_state_from_motionlib_cache(
+                self._sampled_motion_ids, self._motion_start_times,
+                self.global_offset)
+#             breakpoint()
             self.mj_data.qpos = motion_return.qpos[0]
             self.mj_data.qvel = motion_return.qvel[0]
     
@@ -210,7 +224,6 @@ class HumanoidIm(HumanoidTask):
             self.ref_motion_cache['offset'] = offset.copy() if not offset is None else None
         else:
             return self.ref_motion_cache
-#         breakpoint() 
         motion_res = self.motion_lib.get_motion_state_intervaled(motion_ids.copy(), motion_times.copy(), offset=offset)
 
         self.ref_motion_cache.update(motion_res)

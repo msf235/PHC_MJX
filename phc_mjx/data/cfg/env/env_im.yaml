@@ -23,8 +23,10 @@ pdi_scale: 1
 #### Task Configs
 im_obs_v: 1
 im_reward_v: 1
-contact_bodies: ["R_Ankle", "L_Ankle", "R_Toe", "L_Toe"]
-resetBodies: ['Pelvis', 'L_Hip', 'L_Knee', 'R_Hip', 'R_Knee', 'Torso', 'Spine', 'Chest', 'Neck', 'Head', 'L_Thorax', 'L_Shoulder', 'L_Elbow', 'L_Wrist', 'L_Hand', 'R_Thorax', 'R_Shoulder', 'R_Elbow', 'R_Wrist', 'R_Hand']
+#contact_bodies: ["R_Ankle", "L_Ankle", "R_Toe", "L_Toe"]
+contact_bodies_file: "data/mujoco/contact_bodies"
+#resetBodies: ['Pelvis', 'L_Hip', 'L_Knee', 'R_Hip', 'R_Knee', 'Torso', 'Spine', 'Chest', 'Neck', 'Head', 'L_Thorax', 'L_Shoulder', 'L_Elbow', 'L_Wrist', 'L_Hand', 'R_Thorax', 'R_Shoulder', 'R_Elbow', 'R_Wrist', 'R_Hand']
+reset_bodies_file: "data/mujoco/reset_bodies"
 render_mode: "human"
 camera: "side"
 state_init: MoCap

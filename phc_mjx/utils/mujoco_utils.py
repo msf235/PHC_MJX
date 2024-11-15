@@ -53,21 +53,25 @@ def get_jnt_range(model):
         jnt_range[name] = model.jnt_range[i]
     return jnt_range
 
+# def get_actuator_names(model):
+    # actuators = []
+    # for i in range(model.nu):
+        # if i == model.nu - 1:
+            # end_p = None
+            # for el in ["name_sensoradr", "name_numericadr", "name_textadr", "name_tupleadr", "name_keyadr", "name_pluginadr"]:
+                # v = getattr(model, el)
+                # if np.any(v):
+                    # end_p = v[0]
+            # if end_p is None:
+                # end_p = model.nnames
+        # else:
+            # end_p = model.name_actuatoradr[i+1]
+        # name = model.names[model.name_actuatoradr[i]:end_p].decode("utf-8").rstrip('\x00')
+        # actuators.append(name)
+    # return actuators
+
 def get_actuator_names(model):
-    actuators = []
-    for i in range(model.nu):
-        if i == model.nu - 1:
-            end_p = None
-            for el in ["name_sensoradr", "name_numericadr", "name_textadr", "name_tupleadr", "name_keyadr", "name_pluginadr"]:
-                v = getattr(model, el)
-                if np.any(v):
-                    end_p = v[0]
-            if end_p is None:
-                end_p = model.nnames
-        else:
-            end_p = model.name_actuatoradr[i+1]
-        name = model.names[model.name_actuatoradr[i]:end_p].decode("utf-8").rstrip('\x00')
-        actuators.append(name)
+    actuators = [model.actuator(k).name for k in range(model.nu)]
     return actuators
 
 

@@ -116,11 +116,10 @@ class MotionLibBase():
         else:
             sample_idxes = np.remainder(np.arange(num_motion_to_load) + start_idx, self._num_unique_motions )
 
-        breakpoint() 
+#         breakpoint() 
         self._curr_motion_ids = sample_idxes
         self.curr_motion_keys = self._motion_data_keys[sample_idxes]
         self._sampling_batch_prob = self._sampling_prob[self._curr_motion_ids] / self._sampling_prob[self._curr_motion_ids].sum()
-
 
         motion_data_list = self._motion_data_list[sample_idxes]
         mp.set_sharing_strategy('file_descriptor')
@@ -171,7 +170,7 @@ class MotionLibBase():
             motion_lengths.append(curr_len)
             
             del curr_motion
-            
+        
         self._motion_lengths = np.array(motion_lengths).astype(self.dtype)
         self._motion_fps = np.array(motion_fps).astype(self.dtype)
         # self._motion_bodies = np.stack(motion_bodies).astype(self.dtype)
@@ -200,6 +199,8 @@ class MotionLibBase():
         self.motion_ids = np.arange(len(motions))
         motion = motions[0]
         self.num_bodies = self.num_joints
+
+#         breakpoint()
 
         num_motions = self.num_current_motions()
         total_len = self.get_total_length()

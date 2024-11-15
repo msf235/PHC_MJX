@@ -23,6 +23,7 @@ import phc_mjx.utils.np_transform_utils as npt_utils
 import phc_mjx.utils.mujoco_utils as mj_utils
 from phc_mjx.smpllib.smpl_gains import SMPL_GAINS
 from phc_mjx.utils.atlas_gains import ATLAS_GAINS
+from phc_mjx.utils.mujoco_gains import MUJOCO_GAINS
 
 _AVAILABLE_CONTROLLERS = ["uhc_pd", "simple_pid", "pd", "torque", "real_pd"]
 
@@ -90,6 +91,8 @@ class HumanoidEnv(BaseEnv):
             self.load_smpl_configs(cfg)
         elif self.humanoid_type in ["bd_e_atlas"]:
             self.load_bd_e_atlas_configs(cfg)
+        elif self.humanoid_type=="mujoco": # TODO: clean up
+            pass
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
 
@@ -120,6 +123,7 @@ class HumanoidEnv(BaseEnv):
             self.height_fix_mode = FixHeightMode.ankle_fix
     
     def _create_humanoid_robot(self, cfg):
+        # breakpoint()
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             robot_cfg = {
                 "mesh": cfg.robot.has_mesh,
@@ -159,11 +163,16 @@ class HumanoidEnv(BaseEnv):
             if self.render_mode == "rgb_array":
                 # this is temp fix for rendering without visualizer, should we add a camera directly in SMPL_robot
                 self.default_xml_str = smplxadd.smpl_add_camera(self.default_xml_str)
-        elif self.humanoid_type in ["bd_e_atlas"]:
-            self.default_xml_str = self.cfg.robot.xml_file
+        elif self.humanoid_type in ["bd_e_atlas", "mujoco"]:
+            default_xml_file = self.cfg.robot.xml_file
+            self.default_xml_str = default_xml_file
+            # with open(default_xml_file, 'r') as file:
+                # self.default_xml_str = file.read()
+            # self.default_xml_str = self.cfg.robot.xml_file
             self.robot = None
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
+#         breakpoint()
 
     def setup_humanoid_properties(self):
         self.mj_body_names = []
@@ -185,6 +194,9 @@ class HumanoidEnv(BaseEnv):
                 self.body_names_orig = self.mj_body_names[1:]
                 self.q_names = self.mj_joint_names[1:]
                 assert(len(self.q_names) == self.mj_model.nq - 7)
+            elif self.humanoid_type in ["mujoco"]:
+                self.body_names_orig = self.mj_body_names[1:] # making some assumptions about the xml file here. 
+                self.q_names = self.mj_joint_names[2:] # TODO: this assumes 2d dynamics, need to update
             else:
                 raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
             
@@ -192,6 +204,7 @@ class HumanoidEnv(BaseEnv):
         self.num_vel_limit = self.num_rigid_bodies * 3
         self.dof_names = self.body_names_orig[1:] # first joint is not actuated.
         self.actuator_names = mj_utils.get_actuator_names(self.mj_model)
+        self.actuator_dof_names = [x for x in self.actuator_names if 'adh' not in x]
         self.body_qposaddr = mj_utils.get_body_qposaddr(self.mj_model)
         self.body_qveladdr = mj_utils.get_body_qveladdr(self.mj_model)
         self.robot_body_idxes = [
@@ -219,7 +232,6 @@ class HumanoidEnv(BaseEnv):
                 assert(self.cfg.robot.create_vel_sensors)
                 self._num_self_obs = (1 if self._root_height_obs else 0) \
                     + len(self.dof_names) * 3 + len(self.body_names_orig)  * (6 + 3 + 3) 
-                    
             else:
                 raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
             
@@ -234,7 +246,6 @@ class HumanoidEnv(BaseEnv):
                 assert(self.cfg.robot.create_vel_sensors)
                 self._num_self_obs = (1 if self._root_height_obs else 0) \
                     + len(self.dof_names) * 3 + len(self.body_names_orig)  * (6 + 3 + 3) 
-                    
             else:
                 raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
             
@@ -245,6 +256,19 @@ class HumanoidEnv(BaseEnv):
             
             self.q_subsetter = [self.q_names.index(a) for a in self.actuator_names]
             assert(not -1 in self.q_subsetter)
+        elif self.humanoid_type in ["mujoco"]:
+            breakpoint()
+            if self.self_obs_v == 1:
+                self._num_self_obs = (1 if self._root_height_obs else 0) \
+                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * 6 + 3 + 3  + (self.mj_model.nv - 6)
+            elif self.self_obs_v == 2:
+                assert(self.cfg.robot.create_vel_sensors)
+                self._num_self_obs = 80 # TODO: fix this
+                # self._num_self_obs = (1 if self._root_height_obs else 0) \
+                    # + len(self.dof_names) * 3 + len(self.body_names_orig)  * (6 + 3 + 3) 
+            else:
+                raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
+            self.dof_size = len(self.actuator_dof_names)
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
         #####################################################################
@@ -270,8 +294,8 @@ class HumanoidEnv(BaseEnv):
         self.jkp = np.zeros(self.dof_size)
         self.jkd = np.zeros(self.dof_size)
         self.torque_lim = np.zeros(self.dof_size)
-        for idx, n in enumerate(self.actuator_names):
-            joint_config = self.mj_model.joint(n)
+        for idx, n in enumerate(self.actuator_dof_names):
+            joint_config = self.mj_model.joint(idx)
                 
             low, high = joint_config.range
             curr_low = low
@@ -289,11 +313,12 @@ class HumanoidEnv(BaseEnv):
             GAIS = SMPL_GAINS
         elif self.humanoid_type in ["bd_e_atlas"]:
             GAIS = ATLAS_GAINS
+        elif self.humanoid_type in ["mujoco"]:
+            GAIS = MUJOCO_GAINS
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
         
-        
-        for idx, n in enumerate(self.actuator_names):
+        for idx, n in enumerate(self.actuator_dof_names):
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
                 joint = "_".join(n.split("_")[:-1])
             else:
@@ -405,6 +430,7 @@ class HumanoidEnv(BaseEnv):
         return obs, reward, terminated, truncated, info
     
     def init_humanoid(self):
+        breakpoint()
         if self.state_init == HumanoidEnv.StateInit.Default:
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
                 self.mj_data.qpos[:] = 0
@@ -451,6 +477,7 @@ class HumanoidEnv(BaseEnv):
         mujoco.mj_forward(self.mj_model, self.mj_data)
 
     def reset(self, seed=None, options=None):
+        breakpoint()
         self.reset_humanoid()
         self.reset_sim()
         return super().reset(seed=seed, options=options)
@@ -481,6 +508,7 @@ class HumanoidEnv(BaseEnv):
     
     # Getting the body linear velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular. 
     def get_body_linear_vel(self): 
+        breakpoint()
         return self.mj_data.sensordata[:self.num_vel_limit].reshape(self.num_rigid_bodies, 3).copy()
     
     # Getting the body angular velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular. 
