@@ -74,6 +74,7 @@ class MotionLibBase():
         self._num_unique_motions = len(self._motion_data_list)
         if self.mode == MotionlibMode.directory:
             self._motion_data_load = joblib.load(self._motion_data_load[0]) # set self._motion_data_load to a sample of the data 
+#         breakpoint()
 
     def setup_constants(self, fix_height = FixHeightMode.full_fix, multi_thread = True):
         self.fix_height = fix_height
@@ -104,11 +105,10 @@ class MotionLibBase():
         motion_fps_acc = []
         motion_dt = []
         motion_num_frames = []
-        motion_bodies = []
-        motion_aa = []
+        # motion_bodies = []
+        # motion_aa = []
 
         total_len = 0.0
-        
         self.num_joints = len(self.mesh_parsers["0"].joint_names)
         num_motion_to_load = len(shape_params)
         if random_sample:
@@ -116,10 +116,10 @@ class MotionLibBase():
         else:
             sample_idxes = np.remainder(np.arange(num_motion_to_load) + start_idx, self._num_unique_motions )
 
+#         breakpoint() 
         self._curr_motion_ids = sample_idxes
         self.curr_motion_keys = self._motion_data_keys[sample_idxes]
         self._sampling_batch_prob = self._sampling_prob[self._curr_motion_ids] / self._sampling_prob[self._curr_motion_ids].sum()
-
 
         motion_data_list = self._motion_data_list[sample_idxes]
         breakpoint()
@@ -144,6 +144,7 @@ class MotionLibBase():
             worker_args = (*job_args[i], queue, i)
             worker = mp.Process(target=self.load_motion_with_skeleton, args=worker_args)
             worker.start()
+#         breakpoint()
         res_acc.update(self.load_motion_with_skeleton(*jobs[0], None, 0))
         pbar = tqdm(range(len(jobs) - 1)) if not silent else range(len(jobs) - 1)
         for i in pbar:
@@ -160,8 +161,8 @@ class MotionLibBase():
             num_frames = curr_motion.global_translation.shape[0]
             curr_len = 1.0 / motion_fps * (num_frames - 1)
             
-            motion_aa.append(curr_motion.pose_aa)
-            motion_bodies.append(curr_motion.gender_beta)
+            # motion_aa.append(curr_motion.pose_aa)
+            # motion_bodies.append(curr_motion.gender_beta)
 
             motion_fps_acc.append(motion_fps)
             motion_dt.append(curr_dt)
@@ -170,24 +171,24 @@ class MotionLibBase():
             motion_lengths.append(curr_len)
             
             del curr_motion
-            
+        
         self._motion_lengths = np.array(motion_lengths).astype(self.dtype)
         self._motion_fps = np.array(motion_fps).astype(self.dtype)
-        self._motion_bodies = np.stack(motion_bodies).astype(self.dtype)
-        self._motion_aa = np.concatenate(motion_aa).astype(self.dtype)
+        # self._motion_bodies = np.stack(motion_bodies).astype(self.dtype)
+        # self._motion_aa = np.concatenate(motion_aa).astype(self.dtype)
 
         self._motion_dt = np.array(motion_dt).astype(self.dtype)
         self._motion_num_frames = np.array(motion_num_frames)
         self._num_motions = len(motions)
 
-        self.gts = np.concatenate([m.global_translation for m in motions], axis=0).astype(self.dtype)
-        self.grs = np.concatenate([m.global_rotation for m in motions], axis=0).astype(self.dtype)
-        self.lrs = np.concatenate([m.local_rotation for m in motions], axis=0).astype(self.dtype)
-        self.grvs = np.concatenate([m.global_root_velocity for m in motions], axis=0).astype(self.dtype)
-        self.gravs = np.concatenate([m.global_root_angular_velocity for m in motions], axis=0).astype(self.dtype)
-        self.gavs = np.concatenate([m.global_angular_velocity for m in motions], axis=0).astype(self.dtype)
-        self.gvs = np.concatenate([m.global_velocity for m in motions], axis=0).astype(self.dtype)
-        self.dvs = np.concatenate([m.dof_vels for m in motions], axis=0).astype(self.dtype)
+        self.gts = np.concatenate([m.global_translation for m in motions], axis=0).astype(self.dtype) # xpos
+        self.grs = np.concatenate([m.global_rotation for m in motions], axis=0).astype(self.dtype) # xquat
+        # self.lrs = np.concatenate([m.local_rotation for m in motions], axis=0).astype(self.dtype)
+        # self.grvs = np.concatenate([m.global_root_velocity for m in motions], axis=0).astype(self.dtype)
+        # self.gravs = np.concatenate([m.global_root_angular_velocity for m in motions], axis=0).astype(self.dtype)
+        # self.gavs = np.concatenate([m.global_angular_velocity for m in motions], axis=0).astype(self.dtype)
+        # self.gvs = np.concatenate([m.global_velocity for m in motions], axis=0).astype(self.dtype)
+        # self.dvs = np.concatenate([m.dof_vels for m in motions], axis=0).astype(self.dtype)
         self.dof_pos = np.concatenate([m.dof_pos for m in motions], axis=0).astype(self.dtype)
         self.qpos = np.concatenate([m.qpos for m in motions], axis=0).astype(self.dtype)
         self.qvel = np.concatenate([m.qvel for m in motions], axis=0).astype(self.dtype)
@@ -200,12 +201,16 @@ class MotionLibBase():
         motion = motions[0]
         self.num_bodies = self.num_joints
 
+#         breakpoint()
+
         num_motions = self.num_current_motions()
         total_len = self.get_total_length()
         if not silent:
-            print(f"###### Sampling {num_motions:d} motions:", sample_idxes[:5], self.curr_motion_keys[:5], f"total length of {total_len:.3f}s and {self.gts.shape[0]} frames.")
+            print(f"###### Sampling {num_motions:d} motions:",
+                  sample_idxes[:5], self.curr_motion_keys[:5], f"total length of {total_len:.3f}s and {self._motion_num_frames} frames.")
         else:
             print(sample_idxes[:5], end=" ")
+#         breakpoint()
         return motions
 
     def num_current_motions(self):
@@ -319,37 +324,38 @@ class MotionLibBase():
         num_frames = self._motion_num_frames[motion_ids]
         dt = self._motion_dt[motion_ids]
 
-        frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
-        frame_idx = ((1.0 - blend) * frame_idx0 + blend * frame_idx1).astype(int)
-        fl = frame_idx + self.length_starts[motion_ids]
+        # frame_idx0, frame_idx1, blend = self._calc_frame_blend(motion_times, motion_len, num_frames, dt)
+        # frame_idx = ((1.0 - blend) * frame_idx0 + blend * frame_idx1).astype(int)
+        # fl = frame_idx + self.length_starts[motion_ids]
+        fl = self._calc_frame_interval(motion_ids, motion_times, motion_len, num_frames, dt)
 
-        dof_pos = self.dof_pos[fl]
-        body_vel = self.gvs[fl]
-        body_ang_vel = self.gavs[fl]
+        # dof_pos = self.dof_pos[fl]
+        # body_vel = self.gvs[fl]
+        # body_ang_vel = self.gavs[fl]
         xpos = self.gts[fl, :]
         xquat = self.grs[fl]
-        dof_vel = self.dvs[fl]
+        # dof_vel = self.dvs[fl]
         qpos = self.qpos[fl]
         qvel = self.qvel[fl]
 
-        vals = [dof_pos, body_vel, body_ang_vel, xpos, dof_vel]
+        # vals = [dof_pos, body_vel, body_ang_vel, xpos, dof_vel]
 
         if not offset is None:
             xpos = xpos + offset[..., None, :]  # ZL: apply offset
-
+#         breakpoint()
         return EasyDict({
-            "root_pos": xpos[..., 0, :].copy(),
-            "root_rot": xquat[..., 0, :].copy(),
-            "dof_pos": dof_pos.copy(),
-            "root_vel": body_vel[..., 0, :].copy(),
-            "root_ang_vel": body_ang_vel[..., 0, :].copy(),
-            "dof_vel": dof_vel.reshape(dof_vel.shape[0], -1),
-            "motion_aa": self._motion_aa[fl],
+            # "root_pos": xpos[..., 0, :].copy(),
+            # "root_rot": xquat[..., 0, :].copy(),
+            # "dof_pos": dof_pos.copy(),
+            # "root_vel": body_vel[..., 0, :].copy(),
+            # "root_ang_vel": body_ang_vel[..., 0, :].copy(),
+            # "dof_vel": dof_vel.reshape(dof_vel.shape[0], -1),
+            # "motion_aa": self._motion_aa[fl],
             "xpos": xpos,
             "xquat": xquat,
-            "body_vel": body_vel,
-            "body_ang_vel": body_ang_vel,
-            "motion_bodies": self._motion_bodies[motion_ids],
+            # "body_vel": body_vel,
+            # "body_ang_vel": body_ang_vel,
+            # "motion_bodies": self._motion_bodies[motion_ids],
             "qpos": qpos, 
             "qvel": qvel,
         })
@@ -455,8 +461,13 @@ class MotionLibBase():
         frame_idx1 = np.minimum(frame_idx0 + 1, num_frames - 1)
         
         blend = np.clip((time - frame_idx0 * dt) / dt, 0.0, 1.0) # clip blend to be within 0 and 1
-        
         return frame_idx0, frame_idx1, blend
+
+    def _calc_frame_interval(self, motion_ids, time, len, num_frames, dt):
+        frame_idx0, frame_idx1, blend = self._calc_frame_blend(time, len, num_frames, dt)
+        frame_idx = ((1.0 - blend) * frame_idx0 + blend * frame_idx1).astype(int)
+        fl = frame_idx + self.length_starts[motion_ids]
+        return fl
 
     def _get_num_bodies(self):
         return self.num_bodies

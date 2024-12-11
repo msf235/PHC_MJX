@@ -136,7 +136,6 @@ class BaseEnv(gym.Env):
     # Mujoco functions
     ############################################################################################
     def create_sim(self, xml: str):
-        
         if osp.isfile(xml):
             self.mj_model = mujoco.MjModel.from_xml_path(xml)
         else:

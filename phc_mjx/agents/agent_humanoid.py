@@ -90,7 +90,6 @@ class AgentHumanoid(AgentPPO):
         pass
 
     def setup_env(self):
-#         breakpoint()
         self.env = eval(self.cfg.env.task)(self.cfg)
 
     def setup_policy(self):
@@ -197,7 +196,7 @@ class AgentHumanoid(AgentPPO):
 
     def optimize_policy(self,save_model=True):
         starting_epoch = self.epoch
-        breakpoint()
+#         breakpoint()
         for _ in range(starting_epoch, self.cfg.learning.max_epoch):
             info = {}
             t0 = time.time()

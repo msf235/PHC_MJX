@@ -1,4 +1,5 @@
 task: HumanoidIm
+model_file: ""
 note: this is the default config file for humanoid_env
 episode_length: 300
 sim_timestep_inv: 450
