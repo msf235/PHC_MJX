@@ -94,6 +94,7 @@ class HumanoidIm(HumanoidTask):
             "randomrize_heading": not self.test,
         })
         self.motion_lib = MotionLibSMPL(self.motion_lib_cfg)
+        breakpoint()
         if self.test:
             self.motion_lib.load_motions(self.motion_lib_cfg, shape_params = self.gender_betas, random_sample = False)
         else:
