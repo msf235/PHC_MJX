@@ -122,6 +122,7 @@ class MotionLibBase():
         self._sampling_batch_prob = self._sampling_prob[self._curr_motion_ids] / self._sampling_prob[self._curr_motion_ids].sum()
 
         motion_data_list = self._motion_data_list[sample_idxes]
+        breakpoint()
         mp.set_sharing_strategy('file_descriptor')
 
         manager = mp.Manager()
