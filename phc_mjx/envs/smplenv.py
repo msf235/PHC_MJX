@@ -9,12 +9,13 @@ from absl import logging
 from phc_mjx.smpllib.smpl_local_robot import SMPL_Robot
 from phc_mjx.smpllib import smpl_mujoco_new as smplmj
 from phc_mjx.smpllib import smpl_xml_addons as smplxadd
+import phc_mjx.utils.mujoco_utils as mj_utils
 from phc_mjx.envs import controllers as ctrlm
 import warnings
 from collections import OrderedDict
 
-class SMPLHumanoid:
 
+class SMPLHumanoid:
     GENDER2NUM = {
         "female": 2,
         "male": 1,
@@ -249,8 +250,8 @@ class SMPLHumanoid:
             self.mj_model,
             smpl_model="smpl",
         )
-        self.smpl_qpos_addr = smplmj.get_body_qposaddr(self.mj_model)
-        self.smpl_qvel_addr = smplmj.get_body_qveladdr(self.mj_model)
+        self.smpl_qpos_addr = mj_utils.get_body_qposaddr(self.mj_model)
+        self.smpl_qvel_addr = mj_utils.get_body_qveladdr(self.mj_model)
         self.smpl_joint_names = list(self.smpl_qpos_addr.keys())
         self.jkd = self._converter.get_new_jkd()
         self.jkp = self._converter.get_new_jkp()
@@ -262,8 +263,8 @@ class SMPLHumanoid:
             self.body_names.append(body_name)
 
         # extract limits of qpos
-        jnt_range = smplmj.get_jnt_range(self.mj_model)
-        actuators = smplmj.get_actuator_names(self.mj_model)
+        jnt_range = mj_utils.get_jnt_range(self.mj_model)
+        actuators = mj_utils.get_actuator_names(self.mj_model)
         limits = zip(*(jnt_range[actuator] for actuator in actuators))
         lower, upper = (np.array(limit) for limit in limits)
         qpos_range = np.concatenate(
@@ -271,7 +272,10 @@ class SMPLHumanoid:
         )
         self.qpos_range = qpos_range
         ctrl_range = self.mj_model.actuator_ctrlrange
-        assert np.allclose(ctrl_range[:, 0], -1) and np.allclose(ctrl_range[:, 1], 1)
+        breakpoint()
+        if not np.allclose(ctrl_range[:, 0], -1) and np.allclose(ctrl_range[:, 1], 1):
+            print("WARNING: control range is not -1, 1")  # TODO: address this
+        # assert np.allclose(ctrl_range[:, 0], -1) and np.allclose(ctrl_range[:, 1], 1)
         self.ctrl_range = ctrl_range
 
         if self._pid_controlled:

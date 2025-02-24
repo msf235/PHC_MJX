@@ -1,4 +1,3 @@
-
 import torch
 import numpy as np
 from ..utils.torch_geometry_transforms import (
@@ -33,7 +32,7 @@ def smpl_to_qpose(
     """
     Expect pose to be batch_size x 72
     trans to be batch_size x 3
-    differentiable 
+    differentiable
     """
     if trans is None:
         trans = np.zeros((pose.shape[0], 3))
@@ -57,20 +56,32 @@ def smpl_to_qpose(
 
     num_joints = len(joint_names)
     num_angles = num_joints * 3
-    smpl_2_mujoco = [joint_names.index(q) for q in list(mj_utils.get_body_qposaddr(mj_model).keys()) if q in joint_names]
+    smpl_2_mujoco = [
+        joint_names.index(q)
+        for q in list(mj_utils.get_body_qposaddr(mj_model).keys())
+        if q in joint_names
+    ]
 
     pose = pose.reshape(-1, num_angles)
 
-    curr_pose_mat = angle_axis_to_rotation_matrix(pose.reshape(-1, 3)).reshape(pose.shape[0], -1, 4, 4)
+    curr_pose_mat = angle_axis_to_rotation_matrix(pose.reshape(-1, 3)).reshape(
+        pose.shape[0], -1, 4, 4
+    )
 
     curr_spose = sRot.from_matrix(curr_pose_mat[:, :, :3, :3].reshape(-1, 3, 3).numpy())
     if use_quat:
-        curr_spose = curr_spose.as_quat()[:, [3, 0, 1, 2]].reshape(curr_pose_mat.shape[0], -1)
+        curr_spose = curr_spose.as_quat()[:, [3, 0, 1, 2]].reshape(
+            curr_pose_mat.shape[0], -1
+        )
         num_angles = num_joints * (4 if use_quat else 3)
     else:
-        curr_spose = curr_spose.as_euler(euler_order, degrees=False).reshape(curr_pose_mat.shape[0], -1)
+        curr_spose = curr_spose.as_euler(euler_order, degrees=False).reshape(
+            curr_pose_mat.shape[0], -1
+        )
 
-    curr_spose = curr_spose.reshape(-1, num_joints, 4 if use_quat else 3)[:, smpl_2_mujoco, :].reshape(-1, num_angles)
+    curr_spose = curr_spose.reshape(-1, num_joints, 4 if use_quat else 3)[
+        :, smpl_2_mujoco, :
+    ].reshape(-1, num_angles)
     if use_quat:
         curr_qpos = np.concatenate([trans, curr_spose], axis=1)
     else:
@@ -78,11 +89,9 @@ def smpl_to_qpose(
         curr_qpos = np.concatenate((trans, root_quat, curr_spose[:, 3:]), axis=1)
 
     if count_offset:
-
         curr_qpos[:, :3] = trans + mj_model.body_pos[1]
 
     return curr_qpos
-
 
 
 class SMPLConverter:
@@ -253,10 +262,10 @@ class SMPLConverter:
         self.model = model
         self.new_model = new_model
 
-        self.smpl_qpos_addr = get_body_qposaddr(model)
-        self.smpl_qvel_addr = get_body_qveladdr(model)
-        self.new_qpos_addr = get_body_qposaddr(new_model)
-        self.new_qvel_addr = get_body_qveladdr(new_model)
+        self.smpl_qpos_addr = mj_utils.get_body_qposaddr(model)
+        self.smpl_qvel_addr = mj_utils.get_body_qveladdr(model)
+        self.new_qpos_addr = mj_utils.get_body_qposaddr(new_model)
+        self.new_qvel_addr = mj_utils.get_body_qveladdr(new_model)
 
         self.smpl_joint_names = list(self.smpl_qpos_addr.keys())
         self.new_joint_names = list(self.new_qpos_addr.keys())
@@ -269,14 +278,16 @@ class SMPLConverter:
         if len(qpos.shape) == 2:
             b_size = qpos.shape[0]
             jt_array = [
-                qpos[:, smpl_qpos_addr[k][0]:smpl_qpos_addr[k][1]]
-                if k in smpl_qpos_addr else np.zeros((b_size, 3))
+                qpos[:, smpl_qpos_addr[k][0] : smpl_qpos_addr[k][1]]
+                if k in smpl_qpos_addr
+                else np.zeros((b_size, 3))
                 for k in new_qpos_addr.keys()
             ]
         else:
             jt_array = [
-                qpos[smpl_qpos_addr[k][0]:smpl_qpos_addr[k][1]]
-                if k in smpl_qpos_addr else np.zeros((3))
+                qpos[smpl_qpos_addr[k][0] : smpl_qpos_addr[k][1]]
+                if k in smpl_qpos_addr
+                else np.zeros((3))
                 for k in new_qpos_addr.keys()
             ]
         return np.hstack(jt_array)
@@ -287,24 +298,28 @@ class SMPLConverter:
         if len(qpvel.shape) == 2:
             b_size = qpvel.shape[0]
             jt_array = [
-                qpvel[:, smpl_qvel_addr[k][0]:smpl_qvel_addr[k][1]]
-                if k in smpl_qvel_addr else np.zeros((b_size, 3))
+                qpvel[:, smpl_qvel_addr[k][0] : smpl_qvel_addr[k][1]]
+                if k in smpl_qvel_addr
+                else np.zeros((b_size, 3))
                 for k in new_qvel_addr.keys()
             ]
         else:
             jt_array = [
-                qpvel[smpl_qvel_addr[k][0]:smpl_qvel_addr[k][1]]
-                if k in smpl_qvel_addr else np.zeros((3))
+                qpvel[smpl_qvel_addr[k][0] : smpl_qvel_addr[k][1]]
+                if k in smpl_qvel_addr
+                else np.zeros((3))
                 for k in new_qvel_addr.keys()
             ]
         return np.hstack(jt_array)
 
     def qpos_new_2_smpl(self, qpos):
         new_qpos_addr = self.new_qpos_addr
-        subset = np.concatenate([
-            np.arange(new_qpos_addr[jt][0], new_qpos_addr[jt][1])
-            for jt in self.smpl_joint_names
-        ])
+        subset = np.concatenate(
+            [
+                np.arange(new_qpos_addr[jt][0], new_qpos_addr[jt][1])
+                for jt in self.smpl_joint_names
+            ]
+        )
         if len(qpos.shape) == 2:
             return qpos[:, subset]
         else:
@@ -312,10 +327,12 @@ class SMPLConverter:
 
     def qvel_new_2_smpl(self, qvel):
         new_qvel_addr = self.new_qvel_addr
-        subset = np.concatenate([
-            np.arange(new_qvel_addr[jt][0], new_qvel_addr[jt][1])
-            for jt in self.smpl_joint_names
-        ])
+        subset = np.concatenate(
+            [
+                np.arange(new_qvel_addr[jt][0], new_qvel_addr[jt][1])
+                for jt in self.smpl_joint_names
+            ]
+        )
         if len(qvel.shape) == 2:
             return qvel[:, subset]
         else:
@@ -323,52 +340,66 @@ class SMPLConverter:
 
     def jpos_new_2_smpl(self, jpos):
         new_qpos_names = list(self.new_qpos_addr.keys())
-        subset = np.array(
-            [new_qpos_names.index(jt) for jt in self.smpl_joint_names])
-        if len(jpos.shape) == 1 or (len(jpos.shape) == 2
-                                    and jpos.shape[1] == 3):
+        subset = np.array([new_qpos_names.index(jt) for jt in self.smpl_joint_names])
+        if len(jpos.shape) == 1 or (len(jpos.shape) == 2 and jpos.shape[1] == 3):
             return jpos.reshape(-1, 3)[subset, :]
         elif (len(jpos.shape) == 2) or len(jpos.shape) == 3:
             return jpos.reshape(jpos.shape[0], -1, 3)[:, subset, :]
 
     def get_new_qpos_lim(self):
-        return np.max(
-            self.new_model.jnt_qposadr
-        ) + self.new_model.jnt_qposadr[-1] - self.new_model.jnt_qposadr[-2]
+        return (
+            np.max(self.new_model.jnt_qposadr)
+            + self.new_model.jnt_qposadr[-1]
+            - self.new_model.jnt_qposadr[-2]
+        )
 
     def get_new_qvel_lim(self):
-        return np.max(
-            self.new_model.jnt_dofadr
-        ) + self.new_model.jnt_dofadr[-1] - self.new_model.jnt_dofadr[-2]
+        return (
+            np.max(self.new_model.jnt_dofadr)
+            + self.new_model.jnt_dofadr[-1]
+            - self.new_model.jnt_dofadr[-2]
+        )
 
     def get_new_body_lim(self):
         return len(self.new_model.body_names)
 
     def get_new_diff_weight(self):
-        return np.array([
-            self.body_ws[n] if n in self.body_ws else 0
-            for n in self.new_joint_names
-        ])
+        return np.array(
+            [self.body_ws[n] if n in self.body_ws else 0 for n in self.new_joint_names]
+        )
 
     def get_new_jkp(self):
-        return np.concatenate([[self.body_params[n][0]] *
-                               3 if n in self.body_ws else [50] * 3
-                               for n in self.new_joint_names[1:]])
+        return np.concatenate(
+            [
+                [self.body_params[n][0]] * 3 if n in self.body_ws else [50] * 3
+                for n in self.new_joint_names[1:]
+            ]
+        )
 
     def get_new_jkd(self):
-        return np.concatenate([[self.body_params[n][1]] *
-                               3 if n in self.body_ws else [5] * 3
-                               for n in self.new_joint_names[1:]])
+        return np.concatenate(
+            [
+                [self.body_params[n][1]] * 3 if n in self.body_ws else [5] * 3
+                for n in self.new_joint_names[1:]
+            ]
+        )
 
     def get_new_a_scale(self):
-        return np.concatenate([[self.body_params[n][2]] *
-                               3 if n in self.body_ws else [1] * 3
-                               for n in self.new_joint_names[1:]])
+        return np.concatenate(
+            [
+                [self.body_params[n][2]] * 3 if n in self.body_ws else [1] * 3
+                for n in self.new_joint_names[1:]
+            ]
+        )
 
     def get_new_torque_limit(self):
-        return np.concatenate([[self.body_params[n][3]] *
-                               3 if n in self.body_ws else [200] * 3
-                               for n in self.new_joint_names[1:]])
+        return np.concatenate(
+            [
+                [self.body_params[n][3]] * 3 if n in self.body_ws else [200] * 3
+                for n in self.new_joint_names[1:]
+            ]
+        )
+
 
 def normalize_smpl_pose(pose_aa, trans=None, random_root=False):
     root_aa = pose_aa[0, :3]
@@ -391,8 +422,9 @@ def normalize_smpl_pose(pose_aa, trans=None, random_root=False):
     if torch.is_tensor(pose_aa):
         pose_aa = vertizalize_smpl_root(pose_aa, root_vec=target_root_aa)
     else:
-        pose_aa = vertizalize_smpl_root(torch.from_numpy(pose_aa),
-                                        root_vec=target_root_aa)
+        pose_aa = vertizalize_smpl_root(
+            torch.from_numpy(pose_aa), root_vec=target_root_aa
+        )
 
     if not trans is None:
         trans[:, [0, 1]] -= trans[0, [0, 1]]
