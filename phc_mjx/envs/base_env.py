@@ -17,17 +17,19 @@ class BaseEnv(gym.Env):
     """
     BaseEnv Class
     -------------
-    This module contains the BaseEnv class, a base environment for Mujoco simulations. Setup simulation and rendering. 
+    This module contains the BaseEnv class, a base environment for Mujoco simulations. Setup simulation and rendering.
     """
-    
+
     # see https://gymnasium.farama.org/api/env/#gymnasium.Env.render for information
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
-
 
     def __init__(self, cfg):
         self.clip_actions = cfg.env.clip_actions
         self.render_mode = cfg.env.render_mode
-        assert self.render_mode is None or self.render_mode in self.metadata["render_modes"]
+        assert (
+            self.render_mode is None
+            or self.render_mode in self.metadata["render_modes"]
+        )
 
         self.headless = cfg.headless
         self.sim_timestep_inv = cfg.env.sim_timestep_inv
@@ -81,7 +83,7 @@ class BaseEnv(gym.Env):
             self.render()
 
         return observation, info
-    
+
     def step(self, action):
         # apply actions
         self.pre_physics_step(action)
@@ -90,24 +92,26 @@ class BaseEnv(gym.Env):
         self.physics_step(action)
 
         # compute observations, rewards, resets, ...
-        observation, reward, terminated, truncated, info = self.post_physics_step(action)
+        observation, reward, terminated, truncated, info = self.post_physics_step(
+            action
+        )
 
         # if humand render update the visualizer
         if self.render_mode == "human":
             self.render()
 
         return observation, reward, terminated, truncated, info
-    
+
     def render(self):
         return self._render_frame()
 
     def close(self):
         if self.viewer is not None:
             self.viewer.close()
-    
+
     def seed(self, seed: Optional[int] = None):
         super().reset(seed=seed)
-    
+
     ############################################################################################
     # Observations, infos, termination conditions
     ############################################################################################
@@ -118,7 +122,7 @@ class BaseEnv(gym.Env):
 
     def compute_info(self):
         raise NotImplementedError
-    
+
     ############################################################################################
     # Step-related functions
     ############################################################################################
@@ -128,7 +132,7 @@ class BaseEnv(gym.Env):
 
     def post_physics_step(self, action):
         raise NotImplementedError
-    
+
     def pre_physics_step(self, action):
         raise NotImplementedError
 
@@ -151,22 +155,22 @@ class BaseEnv(gym.Env):
         if not self.headless:
             if self.viewer is None and self.renderer is None:
                 self.create_viewer()
-            
+
             if self.render_mode == "human":
                 self.viewer.sync()
                 if self.follow:
                     self.viewer.cam.lookat = self.mj_data.qpos[:3]
-                time.sleep(1. / self.metadata["render_fps"])
-            
+                time.sleep(1.0 / self.metadata["render_fps"])
+
             if self.render_mode == "rgb_array":
                 self.renderer.update_scene(self.mj_data, camera=self.camera)
                 pixels = self.renderer.render()
                 return pixels
-            
+
             if self.recording:
                 self.cur_t
                 self.record_states()
-                
+
     def _create_renderer(self):
         self.renderer = mujoco.Renderer(self.mj_model)  # MJ offline renderer
         mujoco.mj_forward(self.mj_model, self.mj_data)
@@ -175,8 +179,10 @@ class BaseEnv(gym.Env):
     def create_viewer(self):
         if not self.headless and self.render_mode == "human":
             print("human")
-            self.viewer = mujoco.viewer.launch_passive(self.mj_model, self.mj_data, key_callback=self.key_callback)
-            
+            self.viewer = mujoco.viewer.launch_passive(
+                self.mj_model, self.mj_data, key_callback=self.key_callback
+            )
+
         if not self.headless and self.render_mode == "rgb_array":
             self._create_renderer()
 
@@ -197,7 +203,6 @@ class BaseEnv(gym.Env):
             self.recording = not self.recording
             print(f"Record {self.recording}")
 
-
-    # Recording states 
+    # Recording states
     def record_states(self):
         raise NotImplementedError

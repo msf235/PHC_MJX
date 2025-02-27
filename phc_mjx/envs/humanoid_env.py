@@ -62,6 +62,7 @@ class HumanoidEnv(BaseEnv):
         self.state_init = HumanoidEnv.StateInit[cfg.env.state_init]
 
         self._create_humanoid_robot(cfg=self.cfg)
+        breakpoint()
         self.create_sim(
             self.default_xml_str
         )  # Create sim first, then intialize the base env.
@@ -150,6 +151,7 @@ class HumanoidEnv(BaseEnv):
                 "geom_params": {},
                 "actuator_params": {},
             }
+            breakpoint()
             if os.path.exists(self._smpl_data_dir):
                 self.robot = SMPL_Robot(
                     robot_cfg,
