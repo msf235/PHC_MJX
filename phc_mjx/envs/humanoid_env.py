@@ -151,9 +151,8 @@ class HumanoidEnv(BaseEnv):
                 "geom_params": {},
                 "actuator_params": {},
             }
-            breakpoint()
             if os.path.exists(self._smpl_data_dir):
-                self.robot = SMPL_Robot(
+                self.robot = SMPL_Robot(  # What is this robot used for?
                     robot_cfg,
                     data_dir=self._smpl_data_dir,
                 )
@@ -162,8 +161,11 @@ class HumanoidEnv(BaseEnv):
             else:
                 print("Missing SMPL Files!!!!! Using mean netural body ")
                 default_smpl_file = files("phc_mjx").joinpath(
-                    "data/assets/mjcf/smpl_humanoid.xml"
+                    "data/assets/mujoco/humanoid_and_tennis.xml"
                 )
+                # default_smpl_file = files("phc_mjx").joinpath(
+                #     "data/assets/mjcf/smpl_humanoid.xml"
+                # )
                 with open(default_smpl_file, "r") as file:
                     self.default_xml_str = file.read()
                 self.robot = None
