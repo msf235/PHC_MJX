@@ -3,6 +3,7 @@ import os
 import sys
 import pdb
 import os.path as osp
+
 sys.path.append(os.getcwd())
 
 import numpy as np
@@ -31,12 +32,9 @@ try:
     from importlib_resources import files
 except ImportError:
     from importlib.resources import files
-    
-    
 
 
 class HumanoidEnv(BaseEnv):
-
     class StateInit(Enum):
         Default = 0
         Fall = 1
@@ -51,7 +49,9 @@ class HumanoidEnv(BaseEnv):
 
         self.control_mode = self.cfg.control.control_mode
         self.power_scale = self.cfg.control.power_scale
-        assert self.control_mode in _AVAILABLE_CONTROLLERS, f"{self.control_mode} is not a valid controller {_AVAILABLE_CONTROLLERS}"
+        assert (
+            self.control_mode in _AVAILABLE_CONTROLLERS
+        ), f"{self.control_mode} is not a valid controller {_AVAILABLE_CONTROLLERS}"
 
         self.max_episode_length = self.cfg.env.episode_length
         self._root_height_obs = self.cfg.env.root_height_obs
@@ -69,23 +69,27 @@ class HumanoidEnv(BaseEnv):
         # self.create_viewer() # viewer is created when you call render, no need to create it before
         self.state_record = defaultdict(list)
         self.reward_info = {}
-        
+
         self.observation_space = gym.spaces.Box(
             -np.inf * np.ones(self.get_obs_size()),
             np.inf * np.ones(self.get_obs_size()),
             dtype=self.dtype,
         )
-        
+
         self.action_space = gym.spaces.Box(
-            low=-np.ones(self.get_action_size()) if  self.clip_actions else -np.inf * np.ones(self.get_action_size()),
-            high=np.ones(self.get_action_size()) if  self.clip_actions else np.inf * np.ones(self.get_action_size()),
+            low=-np.ones(self.get_action_size())
+            if self.clip_actions
+            else -np.inf * np.ones(self.get_action_size()),
+            high=np.ones(self.get_action_size())
+            if self.clip_actions
+            else np.inf * np.ones(self.get_action_size()),
             dtype=self.dtype,
         )
 
     def load_humanoid_configs(self, cfg):
         self.humanoid_type = cfg.robot.humanoid_type
         self.contact_bodies = self.cfg.robot.contact_bodies
-        
+
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             self.load_smpl_configs(cfg)
         elif self.humanoid_type in ["bd_e_atlas"]:
@@ -97,7 +101,7 @@ class HumanoidEnv(BaseEnv):
         self.load_common_humanoid_configs(cfg)
         self.upright_start = cfg.robot.has_upright_start
         self._smpl_data_dir = cfg.robot.get("smpl_data_dir", "data/smpl")
-        
+
     def load_bd_e_atlas_configs(self, cfg):
         self.load_common_humanoid_configs(cfg)
         self.upright_start = cfg.robot.has_upright_start
@@ -118,7 +122,7 @@ class HumanoidEnv(BaseEnv):
             self.height_fix_mode = FixHeightMode.full_fix
         elif height_fix_mode == "ankle":
             self.height_fix_mode = FixHeightMode.ankle_fix
-    
+
     def _create_humanoid_robot(self, cfg):
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             robot_cfg = {
@@ -147,15 +151,17 @@ class HumanoidEnv(BaseEnv):
                     robot_cfg,
                     data_dir=self._smpl_data_dir,
                 )
-                
+
                 self.default_xml_str = self.robot.export_xml_string().decode("utf-8")
             else:
                 print("Missing SMPL Files!!!!! Using mean netural body ")
-                default_smpl_file = files('phc_mjx').joinpath('data/assets/mjcf/smpl_humanoid.xml')
-                with open(default_smpl_file, 'r') as file:
+                default_smpl_file = files("phc_mjx").joinpath(
+                    "data/assets/mjcf/smpl_humanoid.xml"
+                )
+                with open(default_smpl_file, "r") as file:
                     self.default_xml_str = file.read()
                 self.robot = None
-            
+
             if self.render_mode == "rgb_array":
                 # this is temp fix for rendering without visualizer, should we add a camera directly in SMPL_robot
                 self.default_xml_str = smplxadd.smpl_add_camera(self.default_xml_str)
@@ -171,26 +177,28 @@ class HumanoidEnv(BaseEnv):
         for i in range(self.mj_model.nbody):  # the first one is always world
             body_name = self.mj_model.body(i).name
             self.mj_body_names.append(body_name)
-        
+
         for i in range(self.mj_model.njnt):  # the first one is always world
             joint_name = self.mj_model.joint(i).name
             self.mj_joint_names.append(joint_name)
-        
+
         if self.robot is not None:
-            self.body_names_orig = self.robot.joint_names 
+            self.body_names_orig = self.robot.joint_names
         else:
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
-                self.body_names_orig = self.mj_body_names[1:] # making some assumptions about the xml file here. 
+                self.body_names_orig = self.mj_body_names[
+                    1:
+                ]  # making some assumptions about the xml file here.
             elif self.humanoid_type in ["bd_e_atlas"]:
                 self.body_names_orig = self.mj_body_names[1:]
                 self.q_names = self.mj_joint_names[1:]
-                assert(len(self.q_names) == self.mj_model.nq - 7)
+                assert len(self.q_names) == self.mj_model.nq - 7
             else:
                 raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
-            
+
         self.num_rigid_bodies = len(self.body_names_orig)
         self.num_vel_limit = self.num_rigid_bodies * 3
-        self.dof_names = self.body_names_orig[1:] # first joint is not actuated.
+        self.dof_names = self.body_names_orig[1:]  # first joint is not actuated.
         self.actuator_names = mj_utils.get_actuator_names(self.mj_model)
         self.body_qposaddr = mj_utils.get_body_qposaddr(self.mj_model)
         self.body_qveladdr = mj_utils.get_body_qveladdr(self.mj_model)
@@ -200,70 +208,128 @@ class HumanoidEnv(BaseEnv):
         self.robot_idx_start = self.robot_body_idxes[0]
         self.robot_idx_end = self.robot_body_idxes[-1] + 1
 
-        self.qpos_lim = np.max(self.mj_model.jnt_qposadr) + self.mj_model.jnt_qposadr[-1] - self.mj_model.jnt_qposadr[-2]
-        self.qvel_lim = np.max(self.mj_model.jnt_dofadr) + self.mj_model.jnt_dofadr[-1] - self.mj_model.jnt_dofadr[-2]
-        
+        self.qpos_lim = (
+            np.max(self.mj_model.jnt_qposadr)
+            + self.mj_model.jnt_qposadr[-1]
+            - self.mj_model.jnt_qposadr[-2]
+        )
+        self.qvel_lim = (
+            np.max(self.mj_model.jnt_dofadr)
+            + self.mj_model.jnt_dofadr[-1]
+            - self.mj_model.jnt_dofadr[-2]
+        )
+
         body_type_id = mujoco.mju_str2Type("body")
         geom_type_id = mujoco.mju_str2Type("geom")
-        self.contact_bodies_ids = [mujoco.mj_name2id(self.mj_model, body_type_id, name) for name in self.contact_bodies]
+        self.contact_bodies_ids = [
+            mujoco.mj_name2id(self.mj_model, body_type_id, name)
+            for name in self.contact_bodies
+        ]
         self.floor_idx = mujoco.mj_name2id(self.mj_model, geom_type_id, "floor")
-        
+
         self.q_subsetter = None
-        
+
         ################## Humanoid Character Properties ##################
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             if self.self_obs_v == 1:
-                self._num_self_obs = (1 if self._root_height_obs else 0) \
-                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * 6 + 3 + 3  + len(self.dof_names) * 3
+                self._num_self_obs = (
+                    (1 if self._root_height_obs else 0)
+                    + len(self.dof_names) * 3
+                    + len(self.body_names_orig) * 6
+                    + 3
+                    + 3
+                    + len(self.dof_names) * 3
+                )
             elif self.self_obs_v == 2:
-                assert(self.cfg.robot.create_vel_sensors)
-                self._num_self_obs = (1 if self._root_height_obs else 0) \
-                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * (6 + 3 + 3) 
-                    
+                assert self.cfg.robot.create_vel_sensors
+                self._num_self_obs = (
+                    (1 if self._root_height_obs else 0)
+                    + len(self.dof_names) * 3
+                    + len(self.body_names_orig) * (6 + 3 + 3)
+                )
+
             else:
                 raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
-            
+
             if self.has_shape_variation:
                 self._num_self_obs += 10  # self._num_self_obs = np.sum([v.flatten().shape[-1] for k, v in self.compute_proprioception().items()])
             self.dof_size = self.mj_model.nu
         elif self.humanoid_type in ["bd_e_atlas"]:
             if self.self_obs_v == 1:
-                self._num_self_obs = (1 if self._root_height_obs else 0) \
-                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * 6 + 3 + 3  + (self.mj_model.nv - 6)
+                self._num_self_obs = (
+                    (1 if self._root_height_obs else 0)
+                    + len(self.dof_names) * 3
+                    + len(self.body_names_orig) * 6
+                    + 3
+                    + 3
+                    + (self.mj_model.nv - 6)
+                )
             elif self.self_obs_v == 2:
-                assert(self.cfg.robot.create_vel_sensors)
-                self._num_self_obs = (1 if self._root_height_obs else 0) \
-                    + len(self.dof_names) * 3 + len(self.body_names_orig)  * (6 + 3 + 3) 
-                    
+                assert self.cfg.robot.create_vel_sensors
+                self._num_self_obs = (
+                    (1 if self._root_height_obs else 0)
+                    + len(self.dof_names) * 3
+                    + len(self.body_names_orig) * (6 + 3 + 3)
+                )
+
             else:
                 raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
-            
+
             if self.has_shape_variation:
                 self._num_self_obs += 10  # self._num_self_obs = np.sum([v.flatten().shape[-1] for k, v in self.compute_proprioception().items()])
-            
+
             self.dof_size = self.mj_model.nu
-            
+
             self.q_subsetter = [self.q_names.index(a) for a in self.actuator_names]
-            assert(not -1 in self.q_subsetter)
+            assert not -1 in self.q_subsetter
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
         #####################################################################
 
-            
     def setup_controller(self):
         self.build_pd_action_scale()
         if self.control_mode == "uhc_pd":
-            self.ctrler = ctrls.StablePDController(self._pd_action_scale, self._pd_action_offset, self.qvel_lim, self.torque_lim, self.jkp / self.cfg.env.pdp_scale, self.jkd / self.cfg.env.pdd_scale, self.q_subsetter)
+            self.ctrler = ctrls.StablePDController(
+                self._pd_action_scale,
+                self._pd_action_offset,
+                self.qvel_lim,
+                self.torque_lim,
+                self.jkp / self.cfg.env.pdp_scale,
+                self.jkd / self.cfg.env.pdd_scale,
+                self.q_subsetter,
+            )
         elif self.control_mode == "pd":
-            self.ctrler = ctrls.PIDController(self._pd_action_scale, self._pd_action_offset, self.torque_lim, self.jkp / self.cfg.env.pdp_scale, self.jkd / self.cfg.env.pdd_scale, np.zeros_like(self.jkd))
+            self.ctrler = ctrls.PIDController(
+                self._pd_action_scale,
+                self._pd_action_offset,
+                self.torque_lim,
+                self.jkp / self.cfg.env.pdp_scale,
+                self.jkd / self.cfg.env.pdd_scale,
+                np.zeros_like(self.jkd),
+            )
         elif self.control_mode == "real_pd":
-            self.ctrler = ctrls.RealPDController(self._pd_action_scale, self._pd_action_offset, self.torque_lim, self.jkp / self.cfg.env.pdp_scale, self.jkd / self.cfg.env.pdd_scale, ) 
+            self.ctrler = ctrls.RealPDController(
+                self._pd_action_scale,
+                self._pd_action_offset,
+                self.torque_lim,
+                self.jkp / self.cfg.env.pdp_scale,
+                self.jkd / self.cfg.env.pdd_scale,
+            )
         elif self.control_mode == "simple_pid":
-            self.ctrler = ctrls.SimplePID(self.jkp/10, np.ones_like(self.jkp), self.jkd/10, self.mj_model.opt.timestep*self.control_freq_inv,self.torque_lim, self._pd_action_scale, self._pd_action_offset)
+            self.ctrler = ctrls.SimplePID(
+                self.jkp / 10,
+                np.ones_like(self.jkp),
+                self.jkd / 10,
+                self.mj_model.opt.timestep * self.control_freq_inv,
+                self.torque_lim,
+                self._pd_action_scale,
+                self._pd_action_offset,
+            )
         elif self.control_mode == "torque":
-            self.ctrler = ctrls.SimpleTorqueController(self.power_scale, self.torque_lim)
-            
-        
+            self.ctrler = ctrls.SimpleTorqueController(
+                self.power_scale, self.torque_lim
+            )
+
     def build_pd_action_scale(self):
         lim_high = np.zeros(self.dof_size)
         lim_low = np.zeros(self.dof_size)
@@ -272,7 +338,7 @@ class HumanoidEnv(BaseEnv):
         self.torque_lim = np.zeros(self.dof_size)
         for idx, n in enumerate(self.actuator_names):
             joint_config = self.mj_model.joint(n)
-                
+
             low, high = joint_config.range
             curr_low = low
             curr_high = high
@@ -284,25 +350,24 @@ class HumanoidEnv(BaseEnv):
 
             lim_low[idx] = -curr_scale
             lim_high[idx] = curr_scale
-        
+
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             GAIS = SMPL_GAINS
         elif self.humanoid_type in ["bd_e_atlas"]:
             GAIS = ATLAS_GAINS
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
-        
-        
+
         for idx, n in enumerate(self.actuator_names):
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
                 joint = "_".join(n.split("_")[:-1])
             else:
                 joint = n
-            
+
             self.jkp[idx] = GAIS[self.control_mode][joint][0]
             self.jkd[idx] = GAIS[self.control_mode][joint][1]
             self.torque_lim[idx] = GAIS[self.control_mode][joint][3]
-            
+
         if self.clip_actions:
             self._pd_action_scale = 0.5 * (lim_high - lim_low)
             self._pd_action_offset = 0.5 * (lim_high + lim_low)
@@ -322,40 +387,61 @@ class HumanoidEnv(BaseEnv):
     def compute_observations(self):
         obs = self.compute_proprioception()
         return obs
-    
+
     def compute_info(self):
         return {}
 
     def compute_proprioception(self):
-        mujoco.mj_kinematics(self.mj_model, self.mj_data)  # update xpos to the latest simulation values
-        
-        qpos = self.get_qpos()[None,]  # TODO why qpos is not used in the proprioception?
+        mujoco.mj_kinematics(
+            self.mj_model, self.mj_data
+        )  # update xpos to the latest simulation values
+
+        qpos = self.get_qpos()[
+            None,
+        ]  # TODO why qpos is not used in the proprioception?
         qvel = self.get_qvel()[None,]
         body_pos = self.get_body_xpos()[None,]
         body_rot = self.get_body_xquat()[None,]
 
         if self.self_obs_v == 1:
-            obs_dict =  compute_humanoid_self_obs_v1(qpos, qvel, body_pos, body_rot, self.upright_start, self._root_height_obs,  humanoid_type = self.humanoid_type)
+            obs_dict = compute_humanoid_self_obs_v1(
+                qpos,
+                qvel,
+                body_pos,
+                body_rot,
+                self.upright_start,
+                self._root_height_obs,
+                humanoid_type=self.humanoid_type,
+            )
         elif self.self_obs_v == 2:
             body_vel = self.get_body_linear_vel()[None,]
             body_ang_vel = self.get_body_angular_vel()[None,]
-            obs_dict =  compute_humanoid_self_obs_v2(body_pos, body_rot, body_vel, body_ang_vel, self.upright_start, self._root_height_obs,  humanoid_type = self.humanoid_type)
-        
-        return np.concatenate([v.ravel() for v in obs_dict.values()], axis=0, dtype=self.dtype)
+            obs_dict = compute_humanoid_self_obs_v2(
+                body_pos,
+                body_rot,
+                body_vel,
+                body_ang_vel,
+                self.upright_start,
+                self._root_height_obs,
+                humanoid_type=self.humanoid_type,
+            )
+
+        return np.concatenate(
+            [v.ravel() for v in obs_dict.values()], axis=0, dtype=self.dtype
+        )
         # return obs # we need to change the definition of spaces if we want to keep the dictionary
-        
-    
+
     def compute_torque(self, ctrl):
         # ctrl_joint[:] = 0; # ctrl_joint[self.actuator_names.index("L_Ankle_x")] = 1/2 # Debugging
         torque = self.ctrler.control(ctrl, self.mj_model, self.mj_data)
-        
+
         # np.set_printoptions(precision=4, suppress=1)
         # print(torque, torque.max(), torque.min())
         return torque
-    
+
     def get_body_xpos(self):
         return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
-    
+
     def get_body_xpos_by_id(self, body_id):
         return self.mj_data.xpos[self.robot_idx_start + body_id]
 
@@ -386,9 +472,10 @@ class HumanoidEnv(BaseEnv):
                 self.mj_data.ctrl[:] = torque
                 # np.set_printoptions(precision=4, suppress=1); print(torque.max(), torque.min())
                 mujoco.mj_step(self.mj_model, self.mj_data)
-                self.curr_power_usage.append(np.abs(torque * self.get_qvel()[6:][self.q_subsetter]))
-                
-                
+                self.curr_power_usage.append(
+                    np.abs(torque * self.get_qvel()[6:][self.q_subsetter])
+                )
+
                 # self.mj_data.qpos[2] = 1.5
                 # mujoco.mj_forward(self.mj_model, self.mj_data)
         return
@@ -404,7 +491,7 @@ class HumanoidEnv(BaseEnv):
         info = {}
         info.update(self.reward_info)
         return obs, reward, terminated, truncated, info
-    
+
     def init_humanoid(self):
         if self.state_init == HumanoidEnv.StateInit.Default:
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
@@ -427,18 +514,17 @@ class HumanoidEnv(BaseEnv):
                 mujoco.mj_forward(self.mj_model, self.mj_data)
                 for _ in range(3):
                     # on purpose this is always done in torque space
-                    action = (self.np_random.random(self.get_action_size()) - 0.5 ) * 1
+                    action = (self.np_random.random(self.get_action_size()) - 0.5) * 1
                     for _ in range(self.control_freq_inv):
                         torque = self.compute_torque(action)
                         self.mj_data.ctrl[:] = torque
-                        mujoco.mj_step(self.mj_model, self.mj_data)                
+                        mujoco.mj_step(self.mj_model, self.mj_data)
             else:
                 raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
 
-
     def reset_humanoid(self):
         self.init_humanoid()
-        
+
         # Heading in varance check for proprioception
         # for _ in range(10):
         #     self.mj_data.qpos[:] = np.random.random()
@@ -447,7 +533,7 @@ class HumanoidEnv(BaseEnv):
         #     self.mj_data.qpos[3:7] = npt_utils.xyzw_to_wxyz((sRot.from_euler('xyz', [0, 0, np.random.random() * np.pi], degrees=False) * sRot.from_quat(np.array([0.5, 0.5, 0.5, 0.5])) ).as_quat()); self.reset_sim(); self.render()
         #     prop2 = self.compute_proprioception()
         #     diff = np.concatenate([v.flatten() for v in prop1.values()]) - np.concatenate([v.flatten() for v in prop2.values()]); np.abs(diff).sum()
-        
+
     def reset_sim(self):
         mujoco.mj_forward(self.mj_model, self.mj_data)
 
@@ -475,44 +561,52 @@ class HumanoidEnv(BaseEnv):
 
     def get_body_xvelr(self, name):
         qvel = self.mj_data.qvel.copy()
-        jacr_temp = np.zeros((3, self.mj_model.nv)) # TODO this is not used
+        jacr_temp = np.zeros((3, self.mj_model.nv))  # TODO this is not used
         jacr = self.get_body_jacp_by_name(name).reshape((3, self._model.nv))
         xvelr = np.dot(jacr, qvel)
         return xvelr
-    
-    # Getting the body linear velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular. 
-    def get_body_linear_vel(self): 
-        return self.mj_data.sensordata[:self.num_vel_limit].reshape(self.num_rigid_bodies, 3).copy()
-    
-    # Getting the body angular velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular. 
+
+    # Getting the body linear velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular.
+    def get_body_linear_vel(self):
+        return (
+            self.mj_data.sensordata[: self.num_vel_limit]
+            .reshape(self.num_rigid_bodies, 3)
+            .copy()
+        )
+
+    # Getting the body angular velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular.
     def get_body_angular_vel(self):
-        return self.mj_data.sensordata[self.num_vel_limit:].reshape(self.num_rigid_bodies, 3).copy()
-    
-        
+        return (
+            self.mj_data.sensordata[self.num_vel_limit :]
+            .reshape(self.num_rigid_bodies, 3)
+            .copy()
+        )
+
     def get_qpos(self):
         return self.mj_data.qpos.copy()[: self.qpos_lim]
 
     def get_qvel(self):
-        return self.mj_data.qvel.copy()[:self.qvel_lim]
-    
+        return self.mj_data.qvel.copy()[: self.qvel_lim]
+
     def get_root_pos(self):
         return self.get_body_xpos()[0].copy()
-    
+
     def get_root_state(self):
         return np.concatenate([self.get_qpos()[:7], self.get_qvel()[:6]]).copy()
-    
+
     def record_states(self):
-        self.state_record['qpos'].append(self.get_qpos())
-        self.state_record['qvel'].append(self.get_qvel())
-        
-    
-    
-def compute_humanoid_self_obs_v1(qpos, qvel, body_pos, body_rot, upright_start, root_height_obs, humanoid_type):
+        self.state_record["qpos"].append(self.get_qpos())
+        self.state_record["qvel"].append(self.get_qvel())
+
+
+def compute_humanoid_self_obs_v1(
+    qpos, qvel, body_pos, body_rot, upright_start, root_height_obs, humanoid_type
+):
     obs = OrderedDict()
-    
+
     root_pos = body_pos[:, 0, :]
     root_rot = body_rot[:, 0, :]
-    
+
     if not upright_start:
         root_rot = npt_utils.remove_base_rot(root_rot, humanoid_type)
 
@@ -521,10 +615,13 @@ def compute_humanoid_self_obs_v1(qpos, qvel, body_pos, body_rot, upright_start, 
 
     if root_height_obs:
         obs["root_h_obs"] = root_h
-    
+
     heading_rot_inv_expand = heading_rot_inv[..., None, :]
     heading_rot_inv_expand = heading_rot_inv_expand.repeat(body_pos.shape[1], axis=1)
-    flat_heading_rot_inv = heading_rot_inv_expand.reshape(heading_rot_inv_expand.shape[0] * heading_rot_inv_expand.shape[1],heading_rot_inv_expand.shape[2],)
+    flat_heading_rot_inv = heading_rot_inv_expand.reshape(
+        heading_rot_inv_expand.shape[0] * heading_rot_inv_expand.shape[1],
+        heading_rot_inv_expand.shape[2],
+    )
 
     root_pos_expand = root_pos[..., None, :]
     local_body_pos = body_pos - root_pos_expand
@@ -567,25 +664,31 @@ def compute_humanoid_self_obs_v1(qpos, qvel, body_pos, body_rot, upright_start, 
     flat_root_ang_vel = root_velr.reshape(
         root_velr.shape[0] * root_velr.shape[1], root_velr.shape[2]
     )
-    flat_local_root_ang_vel = npt_utils.quat_rotate(
-        heading_rot_inv, flat_root_ang_vel
-    )
+    flat_local_root_ang_vel = npt_utils.quat_rotate(heading_rot_inv, flat_root_ang_vel)
     obs["local_root_ang_vel"] = flat_local_root_ang_vel.reshape(
         root_velr.shape[0], root_velr.shape[1] * root_velr.shape[2]
     )
-    
+
     obs["body_ang_vel"] = body_vel
-    
+
     return obs
 
 
-# This function is an excat replica of PHC's. 
-def compute_humanoid_self_obs_v2(body_pos, body_rot, body_vel, body_ang_vel, upright_start, root_height_obs, humanoid_type):
+# This function is an excat replica of PHC's.
+def compute_humanoid_self_obs_v2(
+    body_pos,
+    body_rot,
+    body_vel,
+    body_ang_vel,
+    upright_start,
+    root_height_obs,
+    humanoid_type,
+):
     obs = OrderedDict()
-    
+
     root_pos = body_pos[:, 0, :]
     root_rot = body_rot[:, 0, :]
-    
+
     if not upright_start:
         root_rot = npt_utils.remove_base_rot(root_rot, humanoid_type)
 
@@ -594,10 +697,13 @@ def compute_humanoid_self_obs_v2(body_pos, body_rot, body_vel, body_ang_vel, upr
 
     if root_height_obs:
         obs["root_h_obs"] = root_h
-    
+
     heading_rot_inv_expand = heading_rot_inv[..., None, :]
     heading_rot_inv_expand = heading_rot_inv_expand.repeat(body_pos.shape[1], axis=1)
-    flat_heading_rot_inv = heading_rot_inv_expand.reshape(heading_rot_inv_expand.shape[0] * heading_rot_inv_expand.shape[1],heading_rot_inv_expand.shape[2],)
+    flat_heading_rot_inv = heading_rot_inv_expand.reshape(
+        heading_rot_inv_expand.shape[0] * heading_rot_inv_expand.shape[1],
+        heading_rot_inv_expand.shape[2],
+    )
 
     root_pos_expand = root_pos[..., None, :]
     local_body_pos = body_pos - root_pos_expand
@@ -622,13 +728,24 @@ def compute_humanoid_self_obs_v2(body_pos, body_rot, body_vel, body_ang_vel, upr
     )
 
     ###### Velocity ######
-    flat_body_vel = body_vel.reshape(body_vel.shape[0] * body_vel.shape[1], body_vel.shape[2])
+    flat_body_vel = body_vel.reshape(
+        body_vel.shape[0] * body_vel.shape[1], body_vel.shape[2]
+    )
     flat_local_body_vel = npt_utils.quat_rotate(flat_heading_rot_inv, flat_body_vel)
-    obs["local_body_vel"]  = flat_local_body_vel.reshape(body_vel.shape[0], body_vel.shape[1] * body_vel.shape[2])
+    obs["local_body_vel"] = flat_local_body_vel.reshape(
+        body_vel.shape[0], body_vel.shape[1] * body_vel.shape[2]
+    )
 
-    flat_body_ang_vel = body_ang_vel.reshape(body_ang_vel.shape[0] * body_ang_vel.shape[1], body_ang_vel.shape[2])
-    flat_local_body_ang_vel = npt_utils.quat_rotate(flat_heading_rot_inv, flat_body_ang_vel)
-    obs["local_body_ang_vel"] = flat_local_body_ang_vel.reshape(body_ang_vel.shape[0], body_ang_vel.shape[1] * body_ang_vel.shape[2])
-    
-    
+    flat_body_ang_vel = body_ang_vel.reshape(
+        body_ang_vel.shape[0] * body_ang_vel.shape[1], body_ang_vel.shape[2]
+    )
+    flat_local_body_ang_vel = npt_utils.quat_rotate(
+        flat_heading_rot_inv, flat_body_ang_vel
+    )
+    obs["local_body_ang_vel"] = flat_local_body_ang_vel.reshape(
+        body_ang_vel.shape[0], body_ang_vel.shape[1] * body_ang_vel.shape[2]
+    )
+    breakpoint()
+
     return obs
+
