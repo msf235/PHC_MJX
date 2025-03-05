@@ -325,6 +325,12 @@ class HumanoidIm(HumanoidTask):
             motion_ids.copy(), motion_times.copy(), offset=offset
         )
 
+        breakpoint()
+        motion_res.xpos = motion_res.xpos[:, self.body_idx_orig, :]
+        motion_res.xquat = motion_res.xquat[:, self.body_idx_orig, :]
+        motion_res.qpos = motion_res.qpos[:, self.qpos_idx_orig]
+        motion_res.qvel = motion_res.qvel[:, self.qvel_idx_orig]
+        breakpoint()
         self.ref_motion_cache.update(motion_res)
 
         return self.ref_motion_cache

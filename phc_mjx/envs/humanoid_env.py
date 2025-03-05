@@ -212,6 +212,12 @@ class HumanoidEnv(BaseEnv):
                     if self.mj_model.body(body_name).rootid == 1
                     and "core" not in body_name
                 ]
+                self.qpos_idx_orig = mj_utils.get_body_qpos_list(
+                    self.mj_model, self.body_idx_orig
+                )
+                self.qvel_idx_orig = mj_utils.get_body_qvel_list(
+                    self.mj_model, self.body_idx_orig
+                )
                 # breakpoint()
                 # self.body_names_orig = self.mj_body_names[
                 #     1:
