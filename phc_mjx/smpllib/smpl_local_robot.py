@@ -1479,8 +1479,8 @@ class SMPL_Robot:
                 replace_feet=self.replace_feet,
             )
         else:
-            breakpoint()
             self.skeleton = Skeleton(smpl_model=self.smpl_model)
+            # breakpoint()
             if self.smpl_model == "smpl":
                 zero_pose = torch.zeros((1, 72))
             else:

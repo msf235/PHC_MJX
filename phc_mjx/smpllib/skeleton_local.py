@@ -381,7 +381,7 @@ class Skeleton:
             ref_angles = {}
         parser = XMLParser(remove_blank_text=True)
         tree = parse(template_fname, parser=parser)
-        breakpoint()
+        # breakpoint()
         worldbody = tree.getroot().find("worldbody")
         self.size_buffer = {}
         self.write_xml_bodynode(self.root, worldbody, offset, ref_angles)

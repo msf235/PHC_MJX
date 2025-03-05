@@ -62,7 +62,7 @@ class HumanoidEnv(BaseEnv):
         self.state_init = HumanoidEnv.StateInit[cfg.env.state_init]
 
         self._create_humanoid_robot(cfg=self.cfg)
-        breakpoint()
+        # breakpoint()
         self.create_sim(
             self.default_xml_str
         )  # Create sim first, then intialize the base env.
@@ -90,6 +90,7 @@ class HumanoidEnv(BaseEnv):
 
     def load_humanoid_configs(self, cfg):
         self.humanoid_type = cfg.robot.humanoid_type
+        self.use_smpl_data = cfg.robot.use_smpl_data
         self.contact_bodies = self.cfg.robot.contact_bodies
 
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
@@ -151,7 +152,7 @@ class HumanoidEnv(BaseEnv):
                 "geom_params": {},
                 "actuator_params": {},
             }
-            if os.path.exists(self._smpl_data_dir):
+            if os.path.exists(self._smpl_data_dir) and self.use_smpl_data:
                 self.robot = SMPL_Robot(  # What is this robot used for?
                     robot_cfg,
                     data_dir=self._smpl_data_dir,
@@ -166,8 +167,9 @@ class HumanoidEnv(BaseEnv):
                 # default_smpl_file = files("phc_mjx").joinpath(
                 #     "data/assets/mjcf/smpl_humanoid.xml"
                 # )
-                with open(default_smpl_file, "r") as file:
-                    self.default_xml_str = file.read()
+                self.default_xml_str = str(default_smpl_file)
+                # with open(default_smpl_file, "r") as file:
+                #     self.default_xml_str = file.read()
                 self.robot = None
 
             if self.render_mode == "rgb_array":
@@ -175,7 +177,7 @@ class HumanoidEnv(BaseEnv):
                 self.default_xml_str = smplxadd.smpl_add_camera(self.default_xml_str)
         elif self.humanoid_type in ["bd_e_atlas", "mujoco"]:
             default_xml_file = self.cfg.robot.xml_file
-            self.default_xml_str = default_xml_file
+            self.default_xml_str = str(default_xml_file)
             # with open(default_xml_file, 'r') as file:
             # self.default_xml_str = file.read()
             # self.default_xml_str = self.cfg.robot.xml_file
@@ -200,9 +202,15 @@ class HumanoidEnv(BaseEnv):
             self.body_names_orig = self.robot.joint_names
         else:
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
-                self.body_names_orig = self.mj_body_names[
-                    1:
-                ]  # making some assumptions about the xml file here.
+                self.body_names_orig = [
+                    body_name
+                    for body_name in self.mj_body_names
+                    if self.mj_model.body(body_name).rootid == 1
+                    and "core" not in body_name
+                ]
+                # self.body_names_orig = self.mj_body_names[
+                #     1:
+                # ]  # making some assumptions about the xml file here.
             elif self.humanoid_type in ["bd_e_atlas"]:
                 self.body_names_orig = self.mj_body_names[1:]
                 self.q_names = self.mj_joint_names[1:]
@@ -219,7 +227,8 @@ class HumanoidEnv(BaseEnv):
 
         self.num_rigid_bodies = len(self.body_names_orig)
         self.num_vel_limit = self.num_rigid_bodies * 3
-        self.dof_names = self.body_names_orig[1:]  # first joint is not actuated.
+        # self.dof_names = self.body_names_orig[1:]  # first joint is not actuated.
+        self.dof_names = self.body_names_orig  # first joint is not actuated.
         self.actuator_names = mj_utils.get_actuator_names(self.mj_model)
         self.actuator_dof_names = [x for x in self.actuator_names if "adh" not in x]
         self.body_qposaddr = mj_utils.get_body_qposaddr(self.mj_model)
@@ -610,7 +619,6 @@ class HumanoidEnv(BaseEnv):
 
     # Getting the body linear velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular.
     def get_body_linear_vel(self):
-        # breakpoint()
         return (
             self.mj_data.sensordata[: self.num_vel_limit]
             .reshape(self.num_rigid_bodies, 3)
@@ -619,6 +627,7 @@ class HumanoidEnv(BaseEnv):
 
     # Getting the body angular velocity in the world frame using sensors. This is required for self_obs_v2. This function expect sensors to be first linear then angular.
     def get_body_angular_vel(self):
+        # breakpoint()
         return (
             self.mj_data.sensordata[self.num_vel_limit :]
             .reshape(self.num_rigid_bodies, 3)

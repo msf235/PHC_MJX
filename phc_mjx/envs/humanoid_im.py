@@ -232,7 +232,7 @@ class HumanoidIm(HumanoidTask):
             motion_return = self.get_state_from_motionlib_cache(
                 self._sampled_motion_ids, self._motion_start_times, self.global_offset
             )
-            breakpoint()
+            # breakpoint()
             self.mj_data.qpos = motion_return.qpos[0]
             self.mj_data.qvel = motion_return.qvel[0]
 
