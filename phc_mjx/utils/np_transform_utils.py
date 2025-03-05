@@ -29,7 +29,7 @@ def quat_rotate(q, v):
     shape = q.shape
     q_w = q[:, 0]
     q_vec = q[:, 1:]
-    # breakpoint()
+    breakpoint()
     a = v * (2.0 * q_w**2 - 1.0)[..., None]
     b = np.cross(q_vec, v, axis=-1) * q_w[..., None] * 2.0
     c = (
