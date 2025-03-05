@@ -129,7 +129,6 @@ class HumanoidEnv(BaseEnv):
             self.height_fix_mode = FixHeightMode.ankle_fix
 
     def _create_humanoid_robot(self, cfg):
-        # breakpoint()
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             robot_cfg = {
                 "mesh": cfg.robot.has_mesh,
@@ -185,8 +184,6 @@ class HumanoidEnv(BaseEnv):
         else:
             raise NotImplementedError(f"humanoid_type: {self.humanoid_type}")
 
-    #         breakpoint()
-
     def setup_humanoid_properties(self):
         self.mj_body_names = []
         self.mj_joint_names = []
@@ -208,6 +205,14 @@ class HumanoidEnv(BaseEnv):
                     if self.mj_model.body(body_name).rootid == 1
                     and "core" not in body_name
                 ]
+                # TODO: put this in more appropriate place (like mujoco humanoid_type)
+                self.body_idx_orig = [
+                    self.mj_model.body(body_name).id
+                    for body_name in self.mj_body_names
+                    if self.mj_model.body(body_name).rootid == 1
+                    and "core" not in body_name
+                ]
+                # breakpoint()
                 # self.body_names_orig = self.mj_body_names[
                 #     1:
                 # ]  # making some assumptions about the xml file here.
@@ -284,6 +289,7 @@ class HumanoidEnv(BaseEnv):
             if self.has_shape_variation:
                 self._num_self_obs += 10  # self._num_self_obs = np.sum([v.flatten().shape[-1] for k, v in self.compute_proprioception().items()])
             self.dof_size = self.mj_model.nu
+
         elif self.humanoid_type in ["bd_e_atlas"]:
             if self.self_obs_v == 1:
                 self._num_self_obs = (
@@ -490,12 +496,14 @@ class HumanoidEnv(BaseEnv):
         return torque
 
     def get_body_xpos(self):
-        return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
+        return self.mj_data.xpos.copy()[self.body_idx_orig]
+        # return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
 
     def get_body_xpos_by_id(self, body_id):
         return self.mj_data.xpos[self.robot_idx_start + body_id]
 
     def get_body_xquat(self):
+        return self.mj_data.xquat.copy()[self.body_idx_orig]
         return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
 
     def compute_reward(self, actions):

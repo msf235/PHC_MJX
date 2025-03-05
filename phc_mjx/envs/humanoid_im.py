@@ -353,8 +353,8 @@ class HumanoidIm(HumanoidTask):
         body_pos_subset = body_pos[..., self.track_bodies_id, :]
         body_rot_subset = body_rot[..., self.track_bodies_id, :]
         ref_pos_subset = ref_dict.xpos[..., self.track_bodies_id, :]
-        #         breakpoint()
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
+        breakpoint()
 
         if self.im_obs_v == 1:
             ref_qvel = ref_dict.qvel
@@ -605,6 +605,7 @@ def compute_imitation_observations_v1(
     obs["diff_local_root_ang_vel"] = npt_utils.quat_rotate(
         heading_inv_rot.reshape(-1, 4), diff_root_ang_vel.reshape(-1, 3)
     )
+    breakpoint()
     obs["diff_dof_vel"] = ref_body_vel.reshape(
         B, time_steps, J - 1, 3
     ) - body_vel.reshape(B, 1, J - 1, 3)
