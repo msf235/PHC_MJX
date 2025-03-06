@@ -9,6 +9,7 @@ import os.path as osp
 
 from phc_mjx.envs.humanoid_task import HumanoidTask
 import phc_mjx.utils.np_transform_utils as npt_utils
+import phc_mjx.utils.mujoco_utils as mj_utils
 from phc_mjx.utils.mujoco_utils import add_visual_capsule
 from easydict import EasyDict
 from phc_mjx.smpllib.motion_lib_smpl import MotionLibSMPL
@@ -100,12 +101,24 @@ class HumanoidIm(HumanoidTask):
         else:
             self.reset_bodies = self.track_bodies
 
+        # This definition is very shaky in my opinion, since the indexing is relative to body_names_orig.
+        # Better would be to get the absolute indices (relative to the mujoco model) of the bodies to track.
+        # TODO: Considering this, I will create a new version (v2) and eventually deprecate the original.
+        # TODO: Test the case where body_names_orig != track_bodies
         self.track_bodies_id = [
             self.body_names_orig.index(j) for j in self.track_bodies
         ]
+        self.track_bodies_id_v2 = [self.mj_model.body(j).id for j in self.track_bodies]
         self.reset_bodies_id = [
             self.body_names_orig.index(j) for j in self.reset_bodies
         ]
+        self.reset_bodies_id_v2 = [self.mj_model.body(j).id for j in self.reset_bodies]
+        self.track_qpos_id = mj_utils.get_body_qpos_list(
+            self.mj_model, self.track_bodies_id
+        )
+        self.track_qvel_id = mj_utils.get_body_qvel_list(
+            self.mj_model, self.track_bodies_id
+        )
         # breakpoint()
 
     def setup_motion_data(self):  # should this be named setup_motion_sampler?
@@ -233,6 +246,7 @@ class HumanoidIm(HumanoidTask):
                 self._sampled_motion_ids, self._motion_start_times, self.global_offset
             )
             # breakpoint()
+            # self.mj_data.qpos[self.qpos_idx_orig] = motion_return.qpos[0]
             self.mj_data.qpos = motion_return.qpos[0]
             self.mj_data.qvel = motion_return.qvel[0]
 
@@ -325,12 +339,12 @@ class HumanoidIm(HumanoidTask):
             motion_ids.copy(), motion_times.copy(), offset=offset
         )
 
-        breakpoint()
-        motion_res.xpos = motion_res.xpos[:, self.body_idx_orig, :]
-        motion_res.xquat = motion_res.xquat[:, self.body_idx_orig, :]
-        motion_res.qpos = motion_res.qpos[:, self.qpos_idx_orig]
-        motion_res.qvel = motion_res.qvel[:, self.qvel_idx_orig]
-        breakpoint()
+        # breakpoint()
+        # motion_res.xpos = motion_res.xpos[:, self.body_idx_orig, :] # Should use track_bodies_id
+        # motion_res.xquat = motion_res.xquat[:, self.body_idx_orig, :]
+        # motion_res.qpos = motion_res.qpos[:, self.qpos_idx_orig]
+        # motion_res.qvel = motion_res.qvel[:, self.qvel_idx_orig]
+        # breakpoint()
         self.ref_motion_cache.update(motion_res)
 
         return self.ref_motion_cache
@@ -360,10 +374,9 @@ class HumanoidIm(HumanoidTask):
         body_rot_subset = body_rot[..., self.track_bodies_id, :]
         ref_pos_subset = ref_dict.xpos[..., self.track_bodies_id, :]
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
-        breakpoint()
 
         if self.im_obs_v == 1:
-            ref_qvel = ref_dict.qvel
+            ref_qvel = ref_dict.qvel[:, self.track_qvel_id]
             task_obs = compute_imitation_observations_v1(
                 qpos,
                 qvel,
@@ -453,6 +466,7 @@ class HumanoidIm(HumanoidTask):
         body_rot_subset = body_rot[..., self.track_bodies_id, :]
         ref_pos_subset = ref_dict.xpos[..., self.track_bodies_id, :]
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
+        breakpoint()
 
         if self.im_reward_v == 1:
             ref_qvel = ref_dict.qvel
@@ -546,7 +560,7 @@ def compute_imitation_observations_v1(
     # the design of the ref_qvel isn't good.
     obs = OrderedDict()
     B, J, _ = body_pos.shape
-    root_rot = qpos[:, 3:7]
+    root_rot = qpos[:, 3:7]  # TODO: make this more robust
     root_pos = qpos[:, :3]
 
     if not upright:

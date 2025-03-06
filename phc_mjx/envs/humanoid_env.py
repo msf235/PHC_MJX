@@ -212,12 +212,6 @@ class HumanoidEnv(BaseEnv):
                     if self.mj_model.body(body_name).rootid == 1
                     and "core" not in body_name
                 ]
-                self.qpos_idx_orig = mj_utils.get_body_qpos_list(
-                    self.mj_model, self.body_idx_orig
-                )
-                self.qvel_idx_orig = mj_utils.get_body_qvel_list(
-                    self.mj_model, self.body_idx_orig
-                )
                 # breakpoint()
                 # self.body_names_orig = self.mj_body_names[
                 #     1:
@@ -502,15 +496,18 @@ class HumanoidEnv(BaseEnv):
         return torque
 
     def get_body_xpos(self):
-        return self.mj_data.xpos.copy()[self.body_idx_orig]
+        return self.mj_data.xpos.copy()[self.track_bodies_id_v2]
         # return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
+        breakpoint()
 
-    def get_body_xpos_by_id(self, body_id):
-        return self.mj_data.xpos[self.robot_idx_start + body_id]
+    def get_body_xpos_by_id(
+        self, body_id
+    ):  # TODO: perhaps change this to not use relative ids
+        return self.mj_data.xpos.copy()[self.robot_idx_start + body_id]
 
     def get_body_xquat(self):
-        return self.mj_data.xquat.copy()[self.body_idx_orig]
-        return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
+        return self.mj_data.xquat.copy()[self.track_bodies_id_v2]
+        # return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
 
     def compute_reward(self, actions):
         reward = 0
@@ -649,10 +646,12 @@ class HumanoidEnv(BaseEnv):
         )
 
     def get_qpos(self):
-        return self.mj_data.qpos.copy()[: self.qpos_lim]
+        # return self.mj_data.qpos.copy()[: self.qpos_lim]
+        return self.mj_data.qpos.copy()[self.track_qpos_id]
 
     def get_qvel(self):
-        return self.mj_data.qvel.copy()[: self.qvel_lim]
+        # return self.mj_data.qvel.copy()[: self.qvel_lim]
+        return self.mj_data.qvel.copy()[self.track_qvel_id]
 
     def get_root_pos(self):
         return self.get_body_xpos()[0].copy()
