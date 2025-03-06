@@ -651,6 +651,7 @@ class HumanoidEnv(BaseEnv):
 
     def get_qvel(self):
         # return self.mj_data.qvel.copy()[: self.qvel_lim]
+        breakpoint()
         return self.mj_data.qvel.copy()[self.track_qvel_id]
 
     def get_root_pos(self):

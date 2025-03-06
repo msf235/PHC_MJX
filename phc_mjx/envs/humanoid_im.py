@@ -606,7 +606,7 @@ def compute_imitation_observations_v1(
     ##### Velocities
     root_velp = qvel[:, None, 0:3]
     root_velr = qvel[:, None, 3:6]
-    body_vel = qvel[:, 6:]
+    body_vel = qvel[:, 6:]  # TODO: figure out what this is doing
 
     ref_velp = ref_qvel[:, None, 0:3]
     ref_velr = ref_qvel[:, None, 3:6]
@@ -626,6 +626,9 @@ def compute_imitation_observations_v1(
         heading_inv_rot.reshape(-1, 4), diff_root_ang_vel.reshape(-1, 3)
     )
     breakpoint()
+    # obs["diff_dof_vel"] = ref_body_vel.reshape(
+    #     B, time_steps, J - 1, 3
+    # ) - body_vel.reshape(B, 1, J - 1, 3)
     obs["diff_dof_vel"] = ref_body_vel.reshape(
         B, time_steps, J - 1, 3
     ) - body_vel.reshape(B, 1, J - 1, 3)
