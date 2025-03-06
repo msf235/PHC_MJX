@@ -114,10 +114,10 @@ class HumanoidIm(HumanoidTask):
         ]
         self.reset_bodies_id_v2 = [self.mj_model.body(j).id for j in self.reset_bodies]
         self.track_qpos_id = mj_utils.get_body_qpos_list(
-            self.mj_model, self.track_bodies_id
+            self.mj_model, self.track_bodies_id_v2
         )
         self.track_qvel_id = mj_utils.get_body_qvel_list(
-            self.mj_model, self.track_bodies_id
+            self.mj_model, self.track_bodies_id_v2
         )
         # breakpoint()
 
@@ -625,13 +625,13 @@ def compute_imitation_observations_v1(
     obs["diff_local_root_ang_vel"] = npt_utils.quat_rotate(
         heading_inv_rot.reshape(-1, 4), diff_root_ang_vel.reshape(-1, 3)
     )
-    breakpoint()
     # obs["diff_dof_vel"] = ref_body_vel.reshape(
     #     B, time_steps, J - 1, 3
     # ) - body_vel.reshape(B, 1, J - 1, 3)
-    obs["diff_dof_vel"] = ref_body_vel.reshape(
-        B, time_steps, J - 1, 3
-    ) - body_vel.reshape(B, 1, J - 1, 3)
+    # This difference works because we have excluded the quaternion joints
+    obs["diff_dof_vel"] = ref_body_vel.reshape(B, time_steps, -1, 3) - body_vel.reshape(
+        B, 1, -1, 3
+    )
 
     ##### body pos + Dof_pos This part will have proper futuers.
     local_ref_body_pos = ref_body_pos.reshape(B, time_steps, J, 3) - root_pos.reshape(
