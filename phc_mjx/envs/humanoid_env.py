@@ -745,7 +745,5 @@ def compute_humanoid_self_obs_v2(
     obs["local_body_ang_vel"] = flat_local_body_ang_vel.reshape(
         body_ang_vel.shape[0], body_ang_vel.shape[1] * body_ang_vel.shape[2]
     )
-    breakpoint()
 
     return obs
-

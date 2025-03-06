@@ -270,7 +270,6 @@ class HumanoidIm(HumanoidTask):
         motion_res = self.motion_lib.get_motion_state_intervaled(
             motion_ids.copy(), motion_times.copy(), offset=offset
         )
-        breakpoint()
 
         self.ref_motion_cache.update(motion_res)
 
@@ -552,6 +551,7 @@ def compute_imitation_observations_v1(
     obs["diff_local_root_ang_vel"] = npt_utils.quat_rotate(
         heading_inv_rot.reshape(-1, 4), diff_root_ang_vel.reshape(-1, 3)
     )
+    breakpoint()
     obs["diff_dof_vel"] = ref_body_vel.reshape(
         B, time_steps, J - 1, 3
     ) - body_vel.reshape(B, 1, J - 1, 3)
