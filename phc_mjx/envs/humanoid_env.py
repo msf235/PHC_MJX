@@ -233,8 +233,8 @@ class HumanoidEnv(BaseEnv):
 
         self.num_rigid_bodies = len(self.body_names_orig)
         self.num_vel_limit = self.num_rigid_bodies * 3
-        # self.dof_names = self.body_names_orig[1:]  # first joint is not actuated.
-        self.dof_names = self.body_names_orig  # first joint is not actuated.
+        self.dof_names = self.body_names_orig[1:]  # first joint is not actuated.
+        # self.dof_names = self.body_names_orig  # first joint is not actuated.
         self.actuator_names = mj_utils.get_actuator_names(self.mj_model)
         self.actuator_dof_names = [x for x in self.actuator_names if "adh" not in x]
         self.body_qposaddr = mj_utils.get_body_qposaddr(self.mj_model)
@@ -268,7 +268,6 @@ class HumanoidEnv(BaseEnv):
 
         ################## Humanoid Character Properties ##################
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
-            breakpoint()
             if self.self_obs_v == 1:
                 self._num_self_obs = (
                     (1 if self._root_height_obs else 0)
@@ -288,6 +287,7 @@ class HumanoidEnv(BaseEnv):
                 )
             else:
                 raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
+            breakpoint()
 
             if self.has_shape_variation:
                 self._num_self_obs += 10  # self._num_self_obs = np.sum([v.flatten().shape[-1] for k, v in self.compute_proprioception().items()])
