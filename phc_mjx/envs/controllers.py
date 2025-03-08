@@ -136,7 +136,7 @@ class StablePDController:
         """
         # scale ctrl to qpos.range
         target_pos = action * self.pd_action_scale + self.pd_action_offset
-        
+
         torque = self._compute_torque(target_pos, mj_model, mj_data)
         torque = np.clip(torque, -self.torque_lim, self.torque_lim)
         return torque
@@ -147,15 +147,19 @@ class StablePDController:
         qpos = mj_data.qpos.copy()
         qvel = mj_data.qvel.copy()
         dt = mj_model.opt.timestep
-        k_p = np.zeros(qvel.shape[0])
-        k_d = np.zeros(qvel.shape[0])
+        k_p = np.zeros(self.jkp.shape[0] + 6)
+        # k_p = np.zeros(qvel.shape[0])
+        k_d = np.zeros(self.jkp.shape[0] + 6)
+        # k_d = np.zeros(qvel.shape[0])
+        breakpoint()
         curr_jkp = self.jkp
         curr_jkd = self.jkd
         k_p[6:] = curr_jkp
         k_d[6:] = curr_jkd
-        
+
+        # TODO: check this
         qpos_err = np.concatenate((np.zeros(6), qpos[7:] + qvel[6:] * dt - setpoint))
-        
+
         qvel_err = qvel
         q_accel = self._compute_desired_accel(
             qpos_err, qvel_err, k_p, k_d, mj_model, mj_data
@@ -371,12 +375,14 @@ class RealPDController:
         self._integral = 0  # TODO: remove the integral part if not used
         self.subsetter = subsetter if not subsetter is None else slice(None)
 
-    
-        
     def control(
-        self, action: np.ndarray, mj_model: mujoco.MjModel, mj_data: mujoco.MjData, last_dof_vel: np.ndarray
+        self,
+        action: np.ndarray,
+        mj_model: mujoco.MjModel,
+        mj_data: mujoco.MjData,
+        last_dof_vel: np.ndarray,
     ) -> np.ndarray:
-        """ Compute torques from actions.
+        """Compute torques from actions.
             Actions can be interpreted as position or velocity targets given to a PD controller, or directly as scaled torques.
             [NOTE]: torques must have the same dimension as the number of DOFs, even if some DOFs are not actuated.
         Args:
@@ -388,24 +394,35 @@ class RealPDController:
         target_pos = action * self.pd_action_scale + self.pd_action_offset
         qpos = mj_data.qpos.copy()[7:][self.subsetter]
         qvel = mj_data.qvel.copy()[6:][self.subsetter]
-        
-        import ipdb; ipdb.set_trace()
-        #pd controller
-        control_type = "P" # self.cfg.control.control_type
-        actions_scaled = action * self.pd_action_scale # 0.5
+
+        import ipdb
+
+        ipdb.set_trace()
+        # pd controller
+        control_type = "P"  # self.cfg.control.control_type
+        actions_scaled = action * self.pd_action_scale  # 0.5
         # print(actions)
-        import ipdb; ipdb.set_trace()
-        if control_type=="P": # default 
-            torques = self.jkp*(actions_scaled + self.default_dof_pos - qpos) - self.jkd * self._dof_vel
-        elif control_type=="V":
-            torques = self.jkp*(actions_scaled - self.dof_vel) - self.jkd*(qvel - last_dof_vel)/dt
-        elif control_type=="T":
+        import ipdb
+
+        ipdb.set_trace()
+        if control_type == "P":  # default
+            torques = (
+                self.jkp * (actions_scaled + self.default_dof_pos - qpos)
+                - self.jkd * self._dof_vel
+            )
+        elif control_type == "V":
+            torques = (
+                self.jkp * (actions_scaled - self.dof_vel)
+                - self.jkd * (qvel - last_dof_vel) / dt
+            )
+        elif control_type == "T":
             torques = actions_scaled
         else:
             raise NameError(f"Unknown controller type: {control_type}")
         # if self.cfg.domain_rand.randomize_torque_rfi:
-            # torques = torques + (torch.rand_like(torques)*2.-1.) * self.cfg.domain_rand.rfi_lim * self.torque_limits
+        # torques = torques + (torch.rand_like(torques)*2.-1.) * self.cfg.domain_rand.rfi_lim * self.torque_limits
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
 
     def reset(self) -> None:
         self._integral = 0
+

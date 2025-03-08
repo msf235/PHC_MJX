@@ -43,7 +43,7 @@ class AgentHumanoid(AgentPPO):
         self.setup_vars()
         self.setup_data_loader()
         self.setup_env()
-        breakpoint()
+        # breakpoint()
         self.setup_policy()
         self.setup_value()
         self.setup_optimizer()

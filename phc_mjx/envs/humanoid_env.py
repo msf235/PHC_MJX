@@ -287,11 +287,15 @@ class HumanoidEnv(BaseEnv):
                 )
             else:
                 raise NotImplementedError(f"self_obs_v: {self.self_obs_v}")
-            breakpoint()
 
             if self.has_shape_variation:
                 self._num_self_obs += 10  # self._num_self_obs = np.sum([v.flatten().shape[-1] for k, v in self.compute_proprioception().items()])
-            self.dof_size = self.mj_model.nu
+            # self.dof_size = self.mj_model.nu # TODO: make the below more robust
+            acts = [self.mj_model.actuator(i) for i in range(self.mj_model.nu)]
+            acts_no_adh = [a for a in acts if "adh" not in a.name]
+            self.dof_size = len(acts_no_adh)
+            self.torque_idx = [a.id for a in acts_no_adh]
+            self.non_torque_idx = [a.id for a in acts if "adh" in a.name]
 
         elif self.humanoid_type in ["bd_e_atlas"]:
             if self.self_obs_v == 1:
@@ -528,11 +532,15 @@ class HumanoidEnv(BaseEnv):
     def physics_step(self, actions):
         # if not self.action_space.contains(actions):
         # self.render() This is done in the base class
+        ctrl = np.zeros(self.get_action_size())
         self.curr_power_usage = []
         for i in range(self.control_freq_inv):
             if not self.paused:
-                torque = self.compute_torque(actions)
-                self.mj_data.ctrl[:] = torque
+                torque_actions = actions[self.torque_idx]
+                torque = self.compute_torque(torque_actions)
+                ctrl[self.torque_idx] = torque
+                ctrl[self.non_torque_idx] = actions[self.non_torque_idx]
+                self.mj_data.ctrl[:] = ctrl
                 # np.set_printoptions(precision=4, suppress=1); print(torque.max(), torque.min())
                 mujoco.mj_step(self.mj_model, self.mj_data)
                 self.curr_power_usage.append(
