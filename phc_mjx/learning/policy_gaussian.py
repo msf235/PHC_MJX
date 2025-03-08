@@ -10,19 +10,19 @@ from phc_mjx.learning.running_norm import RunningNorm
 import torch
 
 
-
 class PolicyGaussian(Policy):
     def __init__(self, cfg, action_dim, state_dim, net_out_dim=None):
         super().__init__()
         self.type = "gaussian"
         self.norm = RunningNorm(state_dim)
-        
+
         policy_hsize = cfg.learning.mlp.units
         policy_htype = cfg.learning.mlp.activation
         fix_std = cfg.learning.fix_std
         log_std = cfg.learning.log_std
+        breakpoint()
         self.net = net = MLP(state_dim, policy_hsize, policy_htype)
-        
+
         if net_out_dim is None:
             net_out_dim = net.out_dim
         self.action_mean = nn.Linear(net_out_dim, action_dim)

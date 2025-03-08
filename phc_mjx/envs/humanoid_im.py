@@ -89,6 +89,7 @@ class HumanoidIm(HumanoidTask):
     def setup_humanoid_properties(self):
         super().setup_humanoid_properties()
         self.full_track_bodies = self.body_names_orig
+        breakpoint()
         self.track_bodies = self.cfg.env.get("trackBodies", self.full_track_bodies)
         reset_bodies_file = self.cfg.env.get("reset_bodies_file", None)
         if osp.isfile(reset_bodies_file):

@@ -72,6 +72,7 @@ class HumanoidEnv(BaseEnv):
         self.state_record = defaultdict(list)
         self.reward_info = {}
 
+        breakpoint()
         self.observation_space = gym.spaces.Box(
             -np.inf * np.ones(self.get_obs_size()),
             np.inf * np.ones(self.get_obs_size()),
@@ -267,11 +268,13 @@ class HumanoidEnv(BaseEnv):
 
         ################## Humanoid Character Properties ##################
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
+            breakpoint()
             if self.self_obs_v == 1:
                 self._num_self_obs = (
                     (1 if self._root_height_obs else 0)
                     + len(self.dof_names) * 3
-                    + len(self.body_names_orig) * 6
+                    + len(self.body_names_orig)  # TODO: why is this not track_bodies?
+                    * 6
                     + 3
                     + 3
                     + len(self.dof_names) * 3
