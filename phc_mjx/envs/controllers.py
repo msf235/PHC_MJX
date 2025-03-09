@@ -1,6 +1,8 @@
+from typing import Optional
 import numpy as np
 import mujoco
 from scipy.linalg import cho_solve, cho_factor
+from phc_mjx.utils import mujoco_utils as mj_utils
 
 
 class SimpleTorqueController:
@@ -99,6 +101,8 @@ class StablePDController:
 
     def __init__(
         self,
+        mj_model: mujoco.MjModel,
+        mj_data: mujoco.MjData,
         pd_action_scale: np.ndarray,
         pd_action_offset: np.ndarray,
         qvel_lim: np.ndarray,
@@ -106,7 +110,10 @@ class StablePDController:
         jkp: np.ndarray,
         jkd: np.ndarray,
         subsetter: np.ndarray = None,
+        body_idx: Optional[np.ndarray] = None,
     ) -> None:
+        self.mj_model = mj_model  # Note that this isn't used
+        self.mj_data = mj_data  # Note that this isn't used
         self.pd_action_scale = pd_action_scale
         self.pd_action_offset = pd_action_offset
         self.qvel_lim = qvel_lim
@@ -114,9 +121,15 @@ class StablePDController:
         self.jkp = jkp
         self.jkd = jkd
         self.subsetter = subsetter
+        self.body_idx = body_idx
+        self.qpos_idx = mj_utils.get_body_qpos_list(mj_model, self.body_idx)
+        self.qvel_idx = mj_utils.get_body_qvel_list(mj_model, self.body_idx)
 
     def control(
-        self, action: np.ndarray, mj_model: mujoco.MjModel, mj_data: mujoco.MjData
+        self,
+        action: np.ndarray,
+        mj_model: mujoco.MjModel,
+        mj_data: mujoco.MjData,
     ) -> np.ndarray:
         """Computes the clipped torque :math:`\tau^n`.
 
@@ -142,16 +155,24 @@ class StablePDController:
         return torque
 
     def _compute_torque(
-        self, setpoint: np.ndarray, mj_model: mujoco.MjModel, mj_data: mujoco.MjData
+        self,
+        setpoint: np.ndarray,
+        mj_model: mujoco.MjModel,  # TODO: see if I can replace this with self.
+        mj_data: mujoco.MjData,  # TODO: see if I can replace this with self.
     ) -> np.ndarray:
-        qpos = mj_data.qpos.copy()
-        qvel = mj_data.qvel.copy()
+        if self.body_idx is None:
+            qpos = mj_data.qpos.copy()
+            qvel = mj_data.qvel.copy()
+        else:
+            qpos = mj_data.qpos.copy()[self.qpos_idx]
+            qvel = mj_data.qvel.copy()[self.qvel_idx]
+        # qpos = mj_data.qpos.copy()
+        # qvel = mj_data.qvel.copy()
         dt = mj_model.opt.timestep
         k_p = np.zeros(self.jkp.shape[0] + 6)
         # k_p = np.zeros(qvel.shape[0])
         k_d = np.zeros(self.jkp.shape[0] + 6)
         # k_d = np.zeros(qvel.shape[0])
-        breakpoint()
         curr_jkp = self.jkp
         curr_jkd = self.jkd
         k_p[6:] = curr_jkp
@@ -174,17 +195,20 @@ class StablePDController:
         qvel_err: np.ndarray,
         k_p: np.ndarray,
         k_d: np.ndarray,
-        mj_model: mujoco.MjModel,
-        mj_data: mujoco.MjData,
+        mj_model: mujoco.MjModel,  # TODO: see if I can replace this with self.
+        mj_data: mujoco.MjData,  # TODO: see if I can replace this with self.
     ) -> np.ndarray:
         dt = mj_model.opt.timestep
         nv = mj_model.nv
 
         M = np.zeros((nv, nv))
-        mujoco.mj_fullM(mj_model, M, mj_data.qM)
+        mujoco.mj_fullM(self.mj_model, M, self.mj_data.qM)
         M.resize(nv, nv)
-        M = M[: self.qvel_lim, : self.qvel_lim]
-        C = mj_data.qfrc_bias.copy()[: self.qvel_lim]
+        M = M[self.qvel_idx, :][:, self.qvel_idx]
+        # M = M[: self.qvel_lim, : self.qvel_lim]
+        # M = M[: self.qvel_lim, : self.qvel_lim]
+        # C = mj_data.qfrc_bias.copy()[: self.qvel_lim]
+        C = mj_data.qfrc_bias.copy()[self.qvel_idx]
         K_p = np.diag(k_p)
         K_d = np.diag(k_d)
         q_accel = cho_solve(
@@ -425,4 +449,3 @@ class RealPDController:
 
     def reset(self) -> None:
         self._integral = 0
-

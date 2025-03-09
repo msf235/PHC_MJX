@@ -72,7 +72,6 @@ class HumanoidEnv(BaseEnv):
         self.state_record = defaultdict(list)
         self.reward_info = {}
 
-        breakpoint()
         self.observation_space = gym.spaces.Box(
             -np.inf * np.ones(self.get_obs_size()),
             np.inf * np.ones(self.get_obs_size()),
@@ -351,6 +350,8 @@ class HumanoidEnv(BaseEnv):
         self.build_pd_action_scale()
         if self.control_mode == "uhc_pd":
             self.ctrler = ctrls.StablePDController(
+                self.mj_model,
+                self.mj_data,
                 self._pd_action_scale,
                 self._pd_action_offset,
                 self.qvel_lim,
@@ -358,6 +359,7 @@ class HumanoidEnv(BaseEnv):
                 self.jkp / self.cfg.env.pdp_scale,
                 self.jkd / self.cfg.env.pdd_scale,
                 self.q_subsetter,
+                self.body_idx_orig,  # TODO: or should this be track_bodies_id_v2?
             )
         elif self.control_mode == "pd":
             self.ctrler = ctrls.PIDController(

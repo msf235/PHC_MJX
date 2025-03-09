@@ -466,10 +466,10 @@ class HumanoidIm(HumanoidTask):
         body_rot_subset = body_rot[..., self.track_bodies_id, :]
         ref_pos_subset = ref_dict.xpos[..., self.track_bodies_id, :]
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
-        breakpoint()
 
         if self.im_reward_v == 1:
-            ref_qvel = ref_dict.qvel
+            # ref_qvel = ref_dict.qvel
+            ref_qvel = ref_dict.qvel[:, self.track_qvel_id]
             reward, reward_raw = compute_imitation_reward_v1(
                 qpos,
                 qvel,
@@ -766,7 +766,7 @@ def compute_imitation_reward_v1(
     ##### Velocities
     root_velp = qvel[:, None, 0:3]
     root_velr = qvel[:, None, 3:6]
-    body_vel = qvel[:, 6:]
+    body_vel = qvel[:, 6:]  # TODO: I think I need to remove
 
     ref_velp = ref_qvel[:, None, 0:3]
     ref_velr = ref_qvel[:, None, 3:6]

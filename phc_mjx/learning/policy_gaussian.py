@@ -20,7 +20,6 @@ class PolicyGaussian(Policy):
         policy_htype = cfg.learning.mlp.activation
         fix_std = cfg.learning.fix_std
         log_std = cfg.learning.log_std
-        breakpoint()
         self.net = net = MLP(state_dim, policy_hsize, policy_htype)
 
         if net_out_dim is None:
