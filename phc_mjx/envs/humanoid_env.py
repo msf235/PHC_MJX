@@ -508,8 +508,10 @@ class HumanoidEnv(BaseEnv):
         return torque
 
     def get_body_xpos(self):
-        return self.mj_data.xpos.copy()[self.track_bodies_id_v2]
-        # return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
+        if self.body_idx_orig is None:  # TODO: remove this if-else
+            return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
+        else:
+            return self.mj_data.xpos.copy()[self.track_bodies_id_v2]
         breakpoint()
 
     def get_body_xpos_by_id(
@@ -518,8 +520,10 @@ class HumanoidEnv(BaseEnv):
         return self.mj_data.xpos.copy()[self.robot_idx_start + body_id]
 
     def get_body_xquat(self):
-        return self.mj_data.xquat.copy()[self.track_bodies_id_v2]
-        # return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
+        if self.body_idx_orig is None:  # TODO: remove this if-else
+            return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
+        else:
+            return self.mj_data.xquat.copy()[self.track_bodies_id_v2]
 
     def compute_reward(self, actions):
         reward = 0
@@ -662,12 +666,17 @@ class HumanoidEnv(BaseEnv):
         )
 
     def get_qpos(self):
-        # return self.mj_data.qpos.copy()[: self.qpos_lim]
-        return self.mj_data.qpos.copy()[self.track_qpos_id]
+        if self.body_idx_orig is None:  # TODO: remove this if-else
+            return self.mj_data.qpos.copy()[: self.qpos_lim]
+        # return self.mj_data.qpos.copy()[self.track_qpos_id]
+        else:
+            return self.mj_data.qpos.copy()[self.track_qpos_id]
 
     def get_qvel(self):
-        # return self.mj_data.qvel.copy()[: self.qvel_lim]
-        return self.mj_data.qvel.copy()[self.track_qvel_id]
+        if self.body_idx_orig is None:  # TODO: remove this if-else
+            return self.mj_data.qvel.copy()[: self.qvel_lim]
+        else:
+            return self.mj_data.qvel.copy()[self.track_qvel_id]
 
     def get_root_pos(self):
         return self.get_body_xpos()[0].copy()

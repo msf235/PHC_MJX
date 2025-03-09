@@ -205,11 +205,15 @@ class StablePDController:
         M = np.zeros((nv, nv))
         mujoco.mj_fullM(self.mj_model, M, self.mj_data.qM)
         M.resize(nv, nv)
-        M = M[self.qvel_idx, :][:, self.qvel_idx]
-        # M = M[: self.qvel_lim, : self.qvel_lim]
+        if self.body_idx is not None:
+            M = M[self.qvel_idx, :][:, self.qvel_idx]
+            C = mj_data.qfrc_bias.copy()[self.qvel_idx]
+        else:
+            M = M[: self.qvel_lim, : self.qvel_lim]
+            C = mj_data.qfrc_bias.copy()[: self.qvel_lim]
         # M = M[: self.qvel_lim, : self.qvel_lim]
         # C = mj_data.qfrc_bias.copy()[: self.qvel_lim]
-        C = mj_data.qfrc_bias.copy()[self.qvel_idx]
+        # C = mj_data.qfrc_bias.copy()[self.qvel_idx]
         K_p = np.diag(k_p)
         K_d = np.diag(k_d)
         q_accel = cho_solve(
