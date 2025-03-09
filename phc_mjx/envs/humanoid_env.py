@@ -151,6 +151,8 @@ class HumanoidEnv(BaseEnv):
                 "geom_params": {},
                 "actuator_params": {},
             }
+            print(os.getcwd())
+            print(self._smpl_data_dir)
             if os.path.exists(self._smpl_data_dir) and self.use_smpl_data:
                 self.robot = SMPL_Robot(  # What is this robot used for?
                     robot_cfg,
@@ -197,6 +199,7 @@ class HumanoidEnv(BaseEnv):
 
         if self.robot is not None:
             self.body_names_orig = self.robot.joint_names
+            self.body_idx_orig = None
         else:
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
                 self.body_names_orig = [

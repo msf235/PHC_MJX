@@ -122,8 +122,9 @@ class StablePDController:
         self.jkd = jkd
         self.subsetter = subsetter
         self.body_idx = body_idx
-        self.qpos_idx = mj_utils.get_body_qpos_list(mj_model, self.body_idx)
-        self.qvel_idx = mj_utils.get_body_qvel_list(mj_model, self.body_idx)
+        if body_idx is not None:
+            self.qpos_idx = mj_utils.get_body_qpos_list(mj_model, self.body_idx)
+            self.qvel_idx = mj_utils.get_body_qvel_list(mj_model, self.body_idx)
 
     def control(
         self,
