@@ -150,7 +150,10 @@ class MotionLibBase:
 
         motion_data_list = self._motion_data_list[sample_idxes]
         # breakpoint()
-        mp.set_sharing_strategy("file_descriptor")
+        if sys.platform == "darwin":  # TODO: check this isn't entered on Linux
+            mp.set_sharing_strategy("file_system")
+        else:
+            mp.set_sharing_strategy("file_descriptor")
 
         manager = mp.Manager()
         queue = manager.Queue()
