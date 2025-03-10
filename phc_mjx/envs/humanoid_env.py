@@ -151,8 +151,6 @@ class HumanoidEnv(BaseEnv):
                 "geom_params": {},
                 "actuator_params": {},
             }
-            print(os.getcwd())
-            print(self._smpl_data_dir)
             if os.path.exists(self._smpl_data_dir) and self.use_smpl_data:
                 self.robot = SMPL_Robot(  # What is this robot used for?
                     robot_cfg,

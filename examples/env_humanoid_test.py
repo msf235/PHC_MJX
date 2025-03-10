@@ -3,6 +3,7 @@ import os
 import sys
 import pdb
 import os.path as osp
+
 sys.path.append(os.getcwd())
 import time
 # os.environ["MUJOCO_GL"] = 'egl'
@@ -14,10 +15,12 @@ import imageio
 
 ### Mujoco-related imports
 import mujoco
+
 print(f"mujoco.__version__: {mujoco.__version__}")
 ### SMPL
 # from phc_mjx.envs.humanoid_env import HumanoidEnv
 import yaml
+
 try:
     # Python < 3.9
     from importlib_resources import files
@@ -26,40 +29,49 @@ except ImportError:
 import hydra
 from omegaconf import DictConfig, OmegaConf
 import mediapy as media
-from phc_mjx.envs.tasks import *
+from phc_mjx.envs.tasks import HumanoidEnv
+from phc_mjx.envs import HumanoidIm
 
-@hydra.main(version_base=None, config_path=str(files('phc_mjx').joinpath('data/cfg')), config_name="config")
-def main(cfg : DictConfig) -> None:
-    
+
+@hydra.main(
+    version_base=None,
+    config_path=str(files("phc_mjx").joinpath("data/cfg")),
+    config_name="config",
+)
+def main(cfg: DictConfig) -> None:
     # env = HumanoidEnv(cfg)
     cfg.env.camera = "back"
-    env = eval(cfg.env.task)(cfg)
+    if cfg.env.task == "HumanoidEnv":
+        env = HumanoidEnv(cfg)
+    elif cfg.env.task == "HumanoidIm":
+        env = HumanoidIm(cfg)
+    else:
+        raise NotImplementedError(f"Task {cfg.env.task} not implemented")
     print("environment initialized")
     env.reset()
     cur_t, T = 0, 0
     max_T = np.inf
+    # max_T = 20
     if cfg.env.render_mode == "rgb_array":
         max_T = 1
     frames = []
     while True:
-        action = np.zeros(env.mj_data.ctrl.shape[0]) 
+        action = np.zeros(env.mj_data.ctrl.shape[0])
         action[:] = 0
         cur_t += 1
         if cur_t % 90 == 0:
             T += 1
-            
+
         env.step(action=action)
         img = env.render()
         frames.append(img)
 
+        print(T, max_T)
         if T == max_T:
             env.close()
             media.write_video("video.mp4", frames, fps=10)
             break
-        
+
 
 if __name__ == "__main__":
     main()
-
- 
-
