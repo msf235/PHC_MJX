@@ -199,7 +199,7 @@ class HumanoidEnv(BaseEnv):
 
         if self.robot is not None:
             self.body_names_orig = self.robot.joint_names
-            self.body_idx_orig = None
+            # self.body_idx_orig = None
         else:
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
                 self.body_names_orig = [
@@ -208,13 +208,13 @@ class HumanoidEnv(BaseEnv):
                     if self.mj_model.body(body_name).rootid == 1
                     and "core" not in body_name
                 ]
-                # TODO: put this in more appropriate place (like mujoco humanoid_type)
-                self.body_idx_orig = [
-                    self.mj_model.body(body_name).id
-                    for body_name in self.mj_body_names
-                    if self.mj_model.body(body_name).rootid == 1
-                    and "core" not in body_name
-                ]
+                # TODO: replace calls with robot_body_idxes
+                # self.body_idx_orig = [
+                #     self.mj_model.body(body_name).id
+                #     for body_name in self.mj_body_names
+                #     if self.mj_model.body(body_name).rootid == 1
+                #     and "core" not in body_name
+                # ]
                 # breakpoint()
                 # self.body_names_orig = self.mj_body_names[
                 #     1:
@@ -241,11 +241,20 @@ class HumanoidEnv(BaseEnv):
         self.actuator_dof_names = [x for x in self.actuator_names if "adh" not in x]
         self.body_qposaddr = mj_utils.get_body_qposaddr(self.mj_model)
         self.body_qveladdr = mj_utils.get_body_qveladdr(self.mj_model)
+        # self.robot_body_idxes = [ # This was the original
+        #     self.mj_body_names.index(name) for name in self.body_names_orig
+        # ]
         self.robot_body_idxes = [
-            self.mj_body_names.index(name) for name in self.body_names_orig
+            self.mj_model.body(name).id for name in self.body_names_orig
         ]
         self.robot_idx_start = self.robot_body_idxes[0]
         self.robot_idx_end = self.robot_body_idxes[-1] + 1
+        self.robot_qpos_idxes = mj_utils.get_body_qpos_list(
+            self.mj_model, self.robot_body_idxes
+        )
+        self.robot_qvel_idxes = mj_utils.get_body_qvel_list(
+            self.mj_model, self.robot_body_idxes
+        )
 
         self.qpos_lim = (
             np.max(self.mj_model.jnt_qposadr)
@@ -362,7 +371,7 @@ class HumanoidEnv(BaseEnv):
                 self.jkp / self.cfg.env.pdp_scale,
                 self.jkd / self.cfg.env.pdd_scale,
                 self.q_subsetter,
-                self.body_idx_orig,  # TODO: or should this be track_bodies_id_v2?
+                self.robot_body_idxes,  # TODO: or should this be track_bodies_id_v2?
             )
         elif self.control_mode == "pd":
             self.ctrler = ctrls.PIDController(
@@ -508,11 +517,8 @@ class HumanoidEnv(BaseEnv):
         return torque
 
     def get_body_xpos(self):
-        if self.body_idx_orig is None:  # TODO: remove this if-else
-            return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
-        else:
-            return self.mj_data.xpos.copy()[self.track_bodies_id_v2]
-        breakpoint()
+        return self.mj_data.xpos.copy()[self.robot_body_idxes]
+        # return self.mj_data.xpos.copy()[self.robot_idx_start : self.robot_idx_end]
 
     def get_body_xpos_by_id(
         self, body_id
@@ -520,10 +526,8 @@ class HumanoidEnv(BaseEnv):
         return self.mj_data.xpos.copy()[self.robot_idx_start + body_id]
 
     def get_body_xquat(self):
-        if self.body_idx_orig is None:  # TODO: remove this if-else
-            return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
-        else:
-            return self.mj_data.xquat.copy()[self.track_bodies_id_v2]
+        return self.mj_data.xquat.copy()[self.robot_body_idxes]
+        # return self.mj_data.xquat.copy()[self.robot_idx_start : self.robot_idx_end]
 
     def compute_reward(self, actions):
         reward = 0
@@ -666,17 +670,10 @@ class HumanoidEnv(BaseEnv):
         )
 
     def get_qpos(self):
-        if self.body_idx_orig is None:  # TODO: remove this if-else
-            return self.mj_data.qpos.copy()[: self.qpos_lim]
-        # return self.mj_data.qpos.copy()[self.track_qpos_id]
-        else:
-            return self.mj_data.qpos.copy()[self.track_qpos_id]
+        return self.mj_data.qpos.copy()[self.robot_qpos_idxes]
 
     def get_qvel(self):
-        if self.body_idx_orig is None:  # TODO: remove this if-else
-            return self.mj_data.qvel.copy()[: self.qvel_lim]
-        else:
-            return self.mj_data.qvel.copy()[self.track_qvel_id]
+        return self.mj_data.qvel.copy()[self.robot_qvel_idxes]
 
     def get_root_pos(self):
         return self.get_body_xpos()[0].copy()

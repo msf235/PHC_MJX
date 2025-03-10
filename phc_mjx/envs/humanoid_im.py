@@ -108,18 +108,17 @@ class HumanoidIm(HumanoidTask):
         self.track_bodies_id = [
             self.body_names_orig.index(j) for j in self.track_bodies
         ]
-        self.track_bodies_id_v2 = [self.mj_model.body(j).id for j in self.track_bodies]
+        # self.track_bodies_id_v2 = [self.mj_model.body(j).id for j in self.track_bodies]
         self.reset_bodies_id = [
             self.body_names_orig.index(j) for j in self.reset_bodies
         ]
-        self.reset_bodies_id_v2 = [self.mj_model.body(j).id for j in self.reset_bodies]
-        self.track_qpos_id = mj_utils.get_body_qpos_list(
-            self.mj_model, self.track_bodies_id_v2
-        )
-        self.track_qvel_id = mj_utils.get_body_qvel_list(
-            self.mj_model, self.track_bodies_id_v2
-        )
-        # breakpoint()
+        # self.reset_bodies_id_v2 = [self.mj_model.body(j).id for j in self.reset_bodies]
+        # self.track_qpos_id = mj_utils.get_body_qpos_list(
+        #     self.mj_model, self.track_bodies_id_v2
+        # )
+        # self.track_qvel_id = mj_utils.get_body_qvel_list(
+        #     self.mj_model, self.track_bodies_id_v2
+        # )
 
     def setup_motion_data(self):  # should this be named setup_motion_sampler?
         if self.motion_file_type == "smpl":
@@ -376,7 +375,7 @@ class HumanoidIm(HumanoidTask):
         ref_rot_subset = ref_dict.xquat[..., self.track_bodies_id, :]
 
         if self.im_obs_v == 1:
-            ref_qvel = ref_dict.qvel[:, self.track_qvel_id]
+            ref_qvel = ref_dict.qvel[:, self.robot_qvel_idxes]
             task_obs = compute_imitation_observations_v1(
                 qpos,
                 qvel,
@@ -469,7 +468,7 @@ class HumanoidIm(HumanoidTask):
 
         if self.im_reward_v == 1:
             # ref_qvel = ref_dict.qvel
-            ref_qvel = ref_dict.qvel[:, self.track_qvel_id]
+            ref_qvel = ref_dict.qvel[:, self.robot_qvel_idxes]
             reward, reward_raw = compute_imitation_reward_v1(
                 qpos,
                 qvel,
@@ -480,7 +479,8 @@ class HumanoidIm(HumanoidTask):
                 ref_qvel,
                 self.reward_specs,
             )
-        elif self.im_reward_v == 2:
+        elif self.im_reward_v == 2:  # TODO: update indexing
+            print("Need to update indexing for im_reward_v == 2")
             body_vel = self.get_body_linear_vel()[None,]
             body_ang_vel = self.get_body_angular_vel()[None,]
             ref_body_vel_subset = ref_dict.body_vel[..., self.track_bodies_id, :]
