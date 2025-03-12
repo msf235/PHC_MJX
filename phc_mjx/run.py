@@ -82,7 +82,6 @@ def main(cfg: DictConfig) -> None:
             agent.eval_policy()
         else:
             cfg.num_threads = 1
-            breakpoint()
             agent.run_policy()
     else:
         agent.optimize_policy()
