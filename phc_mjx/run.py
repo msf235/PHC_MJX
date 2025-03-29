@@ -1,11 +1,4 @@
-import argparse
-
 import sys
-import pickle
-import time
-import joblib
-import glob
-import pdb
 import os.path as osp
 import os
 
@@ -18,6 +11,7 @@ import wandb
 
 from phc_mjx.utils.flags import flags
 from phc_mjx.agents import agent_dict
+from phc_mjx.agents import AgentAMP, AgentIM
 from omegaconf import DictConfig, OmegaConf
 
 try:
@@ -75,6 +69,8 @@ def main(cfg: DictConfig) -> None:
     agent = agent_dict[cfg.learning.agent_name](
         cfg, dtype, device, training=True, checkpoint_epoch=cfg.epoch
     )
+    # agent = AgentIM(cfg, dtype, device, training=True, checkpoint_epoch=cfg.epoch)
+    # agent = AgentAMP
     #     breakpoint()
 
     if cfg.test:

@@ -142,7 +142,6 @@ class AgentHumanoid(AgentPPO):
         return state
 
     def set_nn_weights(self, weights):
-        breakpoint()
         self.policy_net.load_state_dict(weights["policy"])
         self.value_net.load_state_dict(weights["value"])
 
