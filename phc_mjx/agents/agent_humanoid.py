@@ -97,6 +97,8 @@ class AgentHumanoid(AgentPPO):
         # self.env = eval(self.cfg.env.task)(self.cfg) # This is difficult to debug
         if self.cfg.env.task == "HumanoidIm":
             self.env = HumanoidIm(self.cfg)
+        elif self.cfg.env.task == "HumanoidEnv":
+            self.env = HumanoidEnv(self.cfg)
         else:  # TODO: implement the other envs.
             raise NotImplementedError("TODO: implement the other envs.")
 

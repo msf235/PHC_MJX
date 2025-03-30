@@ -91,7 +91,7 @@ class HumanoidIm(HumanoidTask):
         self.full_track_bodies = self.body_names_orig
         self.track_bodies = self.cfg.env.get("trackBodies", self.full_track_bodies)
         reset_bodies_file = self.cfg.env.get("reset_bodies_file", None)
-        if osp.isfile(reset_bodies_file):
+        if reset_bodies_file is not None and osp.isfile(reset_bodies_file):
             reset_bodies_f = self.cfg.env.get("reset_bodies_file")
             with open(reset_bodies_f, "r") as file:
                 lines = file.readlines()
@@ -391,6 +391,7 @@ class HumanoidIm(HumanoidTask):
         elif self.im_obs_v == 2:
             body_vel = self.get_body_linear_vel()[None,]
             body_ang_vel = self.get_body_angular_vel()[None,]
+            breakpoint()  # TODO: ref_dict doesn't seem to include these
             ref_body_vel_subset = ref_dict.body_vel[..., self.track_bodies_id, :]
             ref_body_ang_vel_subset = ref_dict.body_ang_vel[
                 ..., self.track_bodies_id, :

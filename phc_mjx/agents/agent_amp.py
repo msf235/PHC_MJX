@@ -1,11 +1,11 @@
 import torch
-import torch.nn as nn
 import torch.optim as optim
-from phc_mjx.agents.agent_im import AgentIm  # reuse imitation agent structure
-from phc_mjx.models.amp_discriminator import AMPDiscriminator
+from phc_mjx.agents.agent_humanoid import AgentHumanoid
+from phc_mjx.agents.agent_im import AgentIM  # reuse imitation agent structure
+from phc_mjx.agents.amp_discriminator import AMPDiscriminator
 
 
-class AgentAMP(AgentIm):
+class AgentAMP(AgentIM):
     def __init__(self, cfg, env):
         super().__init__(cfg, env)
 
