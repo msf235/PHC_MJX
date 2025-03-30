@@ -182,7 +182,13 @@ class AgentHumanoid(AgentPPO):
 
     def load_checkpoint(self, epoch):
         if epoch == -1:
-            state = torch.load(f"{self.cfg.output_dir}/Humanoid.pth")
+            if torch.cuda.is_available():
+                map_location = None
+            else:
+                map_location = "cpu"
+            state = torch.load(
+                f"{self.cfg.output_dir}/Humanoid.pth", map_location=map_location
+            )
             self.set_full_state_weights(state)
         elif epoch > 0:
             state = torch.load(f"{self.cfg.output_dir}/Humanoid_{epoch:08d}.pth")
