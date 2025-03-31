@@ -16,7 +16,7 @@
     <geom conaffinity="1" condim="3" name="floor" pos="0 0 0" rgba="0.8 0.9 0.8 1" size="100 100 .2" type="plane" material="MatPlane"/>
     <body name="Pelvis" pos="-0.0018 -0.2233 0.0282">
       <freejoint name="Pelvis"/>
-      <geom type="box" density="3165.830095" pos="-0.0000 -0.0121 -0.0055" size="0.1069 0.0722 0.083" quat="1.0000 0.0000 0.0000 0.0000" name="Pelvis"/>
+      <geom type="box" density="3165.830097" pos="-0.0000 -0.0121 -0.0055" size="0.1069 0.0722 0.083" quat="1.0000 0.0000 0.0000 0.0000" name="Pelvis"/>
       <body name="L_Hip" pos="0.0695 -0.0914 -0.0068">
         <joint name="L_Hip_x" type="hinge" pos="0 0 0" axis="1 0 0" user="250 2.5 1 500 10 2" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
         <joint name="L_Hip_y" type="hinge" pos="0 0 0" axis="0 1 0" user="250 2.5 1 500 10 2" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
@@ -31,7 +31,7 @@
             <joint name="L_Ankle_x" type="hinge" pos="0 0 0" axis="1 0 0" user="150 2.5 1 500 10 2" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
             <joint name="L_Ankle_y" type="hinge" pos="0 0 0" axis="0 1 0" user="150 2.5 1 500 10 2" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
             <joint name="L_Ankle_z" type="hinge" pos="0 0 0" axis="0 0 1" user="150 2.5 1 500 10 2" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
-            <geom type="box" density="449.071569" pos="0.0233 -0.0239 0.0242" size="0.0483 0.0464 0.085" quat="1.0000 0.0000 0.0000 0.0000" name="L_Ankle"/>
+            <geom type="box" density="449.071568" pos="0.0233 -0.0239 0.0242" size="0.0483 0.0464 0.085" quat="1.0000 0.0000 0.0000 0.0000" name="L_Ankle"/>
             <body name="L_Toe" pos="0.0264 -0.0558 0.1193">
               <joint name="L_Toe_x" type="hinge" pos="0 0 0" axis="1 0 0" user="150 1 1 500 1 1" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
               <joint name="L_Toe_y" type="hinge" pos="0 0 0" axis="0 1 0" user="150 1 1 500 1 1" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
@@ -116,7 +116,7 @@
                       <joint name="L_Hand_x" type="hinge" pos="0 0 0" axis="1 0 0" user="50 1 1 150 1 1" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
                       <joint name="L_Hand_y" type="hinge" pos="0 0 0" axis="0 1 0" user="50 1 1 150 1 1" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
                       <joint name="L_Hand_z" type="hinge" pos="0 0 0" axis="0 0 1" user="50 1 1 150 1 1" armature="0.01" range="-180.0000 180.0000" damping="0" stiffness="0"/>
-                      <geom type="box" density="400.552564" pos="0.0493 0.0010 -0.0058" size="0.0585 0.0158 0.0538" quat="1.0000 0.0000 0.0000 0.0000" name="L_Hand"/>
+                      <geom type="box" density="400.552561" pos="0.0493 0.0010 -0.0058" size="0.0585 0.0158 0.0538" quat="1.0000 0.0000 0.0000 0.0000" name="L_Hand"/>
                     </body>
                   </body>
                 </body>
@@ -240,42 +240,55 @@
     <exclude body1="L_Shoulder" body2="Chest"/>
     <exclude body1="R_Shoulder" body2="Chest"/>
   </contact>
-  <sensor/>
+  <sensor>
+    <framelinvel name="sensor_Pelvis_framelinvel" objtype="xbody" objname="Pelvis"/>
+    <framelinvel name="sensor_L_Hip_framelinvel" objtype="xbody" objname="L_Hip"/>
+    <framelinvel name="sensor_L_Knee_framelinvel" objtype="xbody" objname="L_Knee"/>
+    <framelinvel name="sensor_L_Ankle_framelinvel" objtype="xbody" objname="L_Ankle"/>
+    <framelinvel name="sensor_L_Toe_framelinvel" objtype="xbody" objname="L_Toe"/>
+    <framelinvel name="sensor_R_Hip_framelinvel" objtype="xbody" objname="R_Hip"/>
+    <framelinvel name="sensor_R_Knee_framelinvel" objtype="xbody" objname="R_Knee"/>
+    <framelinvel name="sensor_R_Ankle_framelinvel" objtype="xbody" objname="R_Ankle"/>
+    <framelinvel name="sensor_R_Toe_framelinvel" objtype="xbody" objname="R_Toe"/>
+    <framelinvel name="sensor_Torso_framelinvel" objtype="xbody" objname="Torso"/>
+    <framelinvel name="sensor_Spine_framelinvel" objtype="xbody" objname="Spine"/>
+    <framelinvel name="sensor_Chest_framelinvel" objtype="xbody" objname="Chest"/>
+    <framelinvel name="sensor_Neck_framelinvel" objtype="xbody" objname="Neck"/>
+    <framelinvel name="sensor_Head_framelinvel" objtype="xbody" objname="Head"/>
+    <framelinvel name="sensor_L_Thorax_framelinvel" objtype="xbody" objname="L_Thorax"/>
+    <framelinvel name="sensor_L_Shoulder_framelinvel" objtype="xbody" objname="L_Shoulder"/>
+    <framelinvel name="sensor_L_Elbow_framelinvel" objtype="xbody" objname="L_Elbow"/>
+    <framelinvel name="sensor_L_Wrist_framelinvel" objtype="xbody" objname="L_Wrist"/>
+    <framelinvel name="sensor_L_Hand_framelinvel" objtype="xbody" objname="L_Hand"/>
+    <framelinvel name="sensor_R_Thorax_framelinvel" objtype="xbody" objname="R_Thorax"/>
+    <framelinvel name="sensor_R_Shoulder_framelinvel" objtype="xbody" objname="R_Shoulder"/>
+    <framelinvel name="sensor_R_Elbow_framelinvel" objtype="xbody" objname="R_Elbow"/>
+    <framelinvel name="sensor_R_Wrist_framelinvel" objtype="xbody" objname="R_Wrist"/>
+    <framelinvel name="sensor_R_Hand_framelinvel" objtype="xbody" objname="R_Hand"/>
+    <frameangvel name="sensor_Pelvis_frameangvel" objtype="xbody" objname="Pelvis"/>
+    <frameangvel name="sensor_L_Hip_frameangvel" objtype="xbody" objname="L_Hip"/>
+    <frameangvel name="sensor_L_Knee_frameangvel" objtype="xbody" objname="L_Knee"/>
+    <frameangvel name="sensor_L_Ankle_frameangvel" objtype="xbody" objname="L_Ankle"/>
+    <frameangvel name="sensor_L_Toe_frameangvel" objtype="xbody" objname="L_Toe"/>
+    <frameangvel name="sensor_R_Hip_frameangvel" objtype="xbody" objname="R_Hip"/>
+    <frameangvel name="sensor_R_Knee_frameangvel" objtype="xbody" objname="R_Knee"/>
+    <frameangvel name="sensor_R_Ankle_frameangvel" objtype="xbody" objname="R_Ankle"/>
+    <frameangvel name="sensor_R_Toe_frameangvel" objtype="xbody" objname="R_Toe"/>
+    <frameangvel name="sensor_Torso_frameangvel" objtype="xbody" objname="Torso"/>
+    <frameangvel name="sensor_Spine_frameangvel" objtype="xbody" objname="Spine"/>
+    <frameangvel name="sensor_Chest_frameangvel" objtype="xbody" objname="Chest"/>
+    <frameangvel name="sensor_Neck_frameangvel" objtype="xbody" objname="Neck"/>
+    <frameangvel name="sensor_Head_frameangvel" objtype="xbody" objname="Head"/>
+    <frameangvel name="sensor_L_Thorax_frameangvel" objtype="xbody" objname="L_Thorax"/>
+    <frameangvel name="sensor_L_Shoulder_frameangvel" objtype="xbody" objname="L_Shoulder"/>
+    <frameangvel name="sensor_L_Elbow_frameangvel" objtype="xbody" objname="L_Elbow"/>
+    <frameangvel name="sensor_L_Wrist_frameangvel" objtype="xbody" objname="L_Wrist"/>
+    <frameangvel name="sensor_L_Hand_frameangvel" objtype="xbody" objname="L_Hand"/>
+    <frameangvel name="sensor_R_Thorax_frameangvel" objtype="xbody" objname="R_Thorax"/>
+    <frameangvel name="sensor_R_Shoulder_frameangvel" objtype="xbody" objname="R_Shoulder"/>
+    <frameangvel name="sensor_R_Elbow_frameangvel" objtype="xbody" objname="R_Elbow"/>
+    <frameangvel name="sensor_R_Wrist_frameangvel" objtype="xbody" objname="R_Wrist"/>
+    <frameangvel name="sensor_R_Hand_frameangvel" objtype="xbody" objname="R_Hand"/>
+  </sensor>
   <size njmax="700" nconmax="700"/>
-  <keyframe>
-    <key name="mocapkey1" qpos="
-        -0.14426346 -0.2548669  0.93561393  0.04709487  0.0399107
-         0.67674685  0.7336231  0.17616479  0.08318119  0.04824333
-        -0.07312427 -0.05859271 -0.04904975 -0.15061913  0.13697378
-         0.08793706  0.0  0.0  0.0  0.15672256
-        -0.06152193 -0.03302204 -0.0548543  0.03923444  0.06740185
-        -0.05360978 -0.02410129  0.10172428  0.0  0.0
-         0.0  0.09632684  0.00737159 -0.00681898  0.04040197
-        -0.05157863  0.0183998  0.04037395 -0.01544289  0.01334759
-        -0.01976619  0.04973658 -0.01946192  0.01356398 -0.00550782
-        -0.01633868  0.08427852  0.01847901 -0.42414925 -0.01715259
-        -0.19665715 -1.0586443  0.27059013 -0.42222056  0.20862088
-        -0.14239776 -0.05630037 -0.08847867  0.0  0.0
-         0.0  0.04334291  0.050582  0.43154302  0.00844709
-         0.22953878  1.0244433 -0.00678981  0.33399022 -0.16710037
-        -0.1558385  0.02925445  0.10611813  0.0  0.0
-         0.0"/>
-    <key name="tpose1" qpos="
-        0.0  0.0  0.94  0.5  0.5
-        0.5  0.5  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0  0.0  0.0   0.0  0.0
-        0.0"/>
-  </keyframe>
 </mujoco>

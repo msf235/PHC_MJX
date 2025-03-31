@@ -158,6 +158,9 @@ class HumanoidEnv(BaseEnv):
                 )
 
                 self.default_xml_str = self.robot.export_xml_string().decode("utf-8")
+                # with open("smpl_humanoid_neutral.xml", "w") as file:
+                #     file.write(self.default_xml_str)
+                # breakpoint()
             else:
                 print("Missing SMPL Files!!!!! Using mean netural body ")
                 default_smpl_file = files("phc_mjx").joinpath(
